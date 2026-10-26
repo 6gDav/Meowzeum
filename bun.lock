@@ -14,7 +14,7 @@
     "apps/api": {
       "name": "api",
       "dependencies": {
-        "@my-social-app/shared-types": "workspace:*",
+        "@Meowzeum/shared-types": "workspace:*",
         "hono": "^4.13.14",
       },
       "devDependencies": {
@@ -27,7 +27,7 @@
     "apps/web": {
       "name": "web",
       "dependencies": {
-        "@my-social-app/shared-types": "workspace:*",
+        "@Meowzeum/shared-types": "workspace:*",
         "@tailwindcss/vite": "^4.1.18",
         "@tanstack/react-devtools": "0.10.13",
         "@tanstack/react-router": "1.170.46",
@@ -50,7 +50,7 @@
       },
     },
     "packages/shared-types": {
-      "name": "@my-social-app/shared-types",
+      "name": "@Meowzeum/shared-types",
       "version": "1.0.0",
       "dependencies": {
         "zod": "^4.6.7",
@@ -58,6 +58,8 @@
     },
   },
   "packages": {
+    "@Meowzeum/shared-types": ["@Meowzeum/shared-types@workspace:packages/shared-types"],
+
     "@babel/code-frame": ["@babel/code-frame@7.29.7", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.29.7", "js-tokens": "^4.0.0", "picocolors": "^1.1.1" } }, "sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw=="],
 
     "@babel/compat-data": ["@babel/compat-data@7.29.7", "", {}, "sha512-locTkQyKvwIEgBzVrn8693ebc97F2U8ZHjbXwDXJ5Fn2TCpNwTlKcaKLkdHop5c/icOFE7qt7Q9JC5hnKNa6Gg=="],
@@ -105,8 +107,6 @@
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.6.0", "", {}, "sha512-T7jf+5zgsZHwNJ4lvQ7/aezbyk0nNX+zJVWpmHA7VYsEx7a7qr5Rg5IbtJFqkgze5Y2sruq1RUY8Q837Od7iFw=="],
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
-
-    "@my-social-app/shared-types": ["@my-social-app/shared-types@workspace:packages/shared-types"],
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@1.2.6", "", { "dependencies": { "@tybys/wasm-util": "^0.10.3" }, "peerDependencies": { "@emnapi/core": "^1.7.1 || 2.0.0-beta.2", "@emnapi/runtime": "^1.7.1 || 2.0.0-beta.2" } }, "sha512-mRyDmEw9/fCDXCGfL1sbgIw/GUK0PVxRW4YwgPN61F3LQ+fSyoBFarJVzgGyhF6kRzEQZ0FejDqm4WLXSeqQmw=="],
 

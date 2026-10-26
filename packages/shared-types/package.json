@@ -1,5 +1,5 @@
 {
-  "name": "@my-social-app/shared-types",
+  "name": "@Meowzeum/shared-types",
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
