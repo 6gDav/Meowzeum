@@ -1,4 +1,4 @@
-# meowzeum
+# Meowzeum
 
 To install dependencies:
 
@@ -6,10 +6,16 @@ To install dependencies:
 bun install
 ```
 
-To run:
+To run Web (Frontend):
 
 ```bash
-bun run index.ts
+bun run dev:web
+```
+
+To run Web (Frontend):
+
+```bash
+bun run dev:api
 ```
 
 This project was created using `bun init` in bun v1.4.0. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
