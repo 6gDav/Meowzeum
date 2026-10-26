@@ -1,0 +1,8 @@
+{
+  "name": "@my-social-app/shared-types",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
+}
