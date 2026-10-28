@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 
 const app = new Hono()
 
-app.get('/', (c) => c.json({ status: 'ok' }))
+app.get('/', (c) => c.json("Hello from the backend"))
 
 export default {
     port: 3001,
