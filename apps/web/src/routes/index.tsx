@@ -1,17 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { getDataFromAnotherBackend } from '../functions/externalAPICall'
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
+import { backendDataQueryOptions } from '../functions/externalAPICall'
 
 export const Route = createFileRoute('/')({
-  loader: () => getDataFromAnotherBackend(),
   component: App,
 })
 
 function App() {
-  const data = Route.useLoaderData()
+  const { data, isLoading, error } = useQuery(backendDataQueryOptions())
 
-  return (
-    <>
-      <h1>{data}</h1>
-    </>
-  )
+  if (isLoading) return <p>Loading...</p>
+  if (error) return <p>Error: {error.message}</p>
+
+  return <pre>{JSON.stringify(data, null, 2)}</pre>
 }
