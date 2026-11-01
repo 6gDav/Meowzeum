@@ -1,5 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { queryOptions } from '@tanstack/react-query'
+import { GetSchema } from '@Meowzeum/shared-types'
 
 export const getDataFromAnotherBackend = createServerFn({ method: 'GET' })
   .handler(async () => {
@@ -11,7 +12,9 @@ export const getDataFromAnotherBackend = createServerFn({ method: 'GET' })
       )
     }
 
-    return await response.json()
+    const rawData = await response.json()
+
+    return GetSchema.parse(rawData)
   })
 
 export const backendDataQueryOptions = () =>

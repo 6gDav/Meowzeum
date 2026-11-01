@@ -1,11 +1,9 @@
 import { z } from 'zod'
 
 //Example only
-export const PostSchema = z.object({
+export const GetSchema = z.object({
   id: z.string(),
-  content: z.string().min(1).max(280),
-  authorId: z.string(),
-  createdAt: z.date(),
+  message: z.string()
 })
 
-export type Post = z.infer<typeof PostSchema>
+export type Get = z.infer<typeof GetSchema>

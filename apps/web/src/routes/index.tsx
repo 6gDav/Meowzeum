@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { backendDataQueryOptions } from '../functions/externalAPICall'
 
 export const Route = createFileRoute('/')({
