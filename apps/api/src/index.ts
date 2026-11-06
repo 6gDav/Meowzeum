@@ -1,16 +1,33 @@
 import { Hono } from 'hono'
-import { type Get } from '@Meowzeum/shared-types'
+import { logger } from 'hono/logger'
+import { cors } from 'hono/cors'
+import catImagesRouter from './components/routes/catImages'
+import catInfoRouter from './components/routes/catInfo'
+import catInfoDetailRouter from './components/routes/catInfoDetail'
 
-const app = new Hono()
+type Variables = {
+  catImages: string[]
+}
 
-app.get('/', (c) => {
-  return c.json({
-    id: '123',
-    message: 'Hello from the backend'
-  } satisfies Get)
-})
+export const app = new Hono<{ Variables: Variables }>()
+
+app.use('*', cors({
+  origin: '*',
+  allowMethods: ['GET'],
+}))
+app.use('*', logger())
+
+app.get('/favicon.ico', (c) => c.body(null, 204))
+
+app.route('/', catImagesRouter)     // :: /get-a-cat-image => http://localhost:3001/get-a-cat-image
+app.route('/', catInfoRouter)       // :: /get-a-cat-info/:name => http://localhost:3001/get-a-cat-info/Ragdoll
+app.route('/', catInfoDetailRouter) // :: /get-a-cat-info-datail/get-all-names/ => http://localhost:3001/get-a-cat-info-datail/get-all-names/
+                                    // :: //get-a-cat-info-datail/:name/:datail => http://localhost:3001/get-a-cat-info-datail/Ragdoll/lifespan
+
+const port = parseInt(process.env.PORT || '3001')
 
 export default {
-  port: 3001,
+  port: port,
+  hostname: '0.0.0.0',
   fetch: app.fetch,
 }
