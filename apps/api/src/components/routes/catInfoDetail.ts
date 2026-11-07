@@ -16,25 +16,24 @@ catInfoDetailRouter.get('/get-a-cat-info-datail/get-all-properties/', limiter(3)
   return c.json(catNames);
 });
 
-catInfoDetailRouter.get('/get-a-cat-info-datail/:name/:datail',limiter(3), async (c) => {
+catInfoDetailRouter.get('/get-a-cat-info-datail/:name/:datail', limiter(3), async (c) => {
   const catName = c.req.param('name');
   const catDetail = c.req.param('datail');
 
   const catInfo = catDatabase.find((cat) => cat.name === catName);
   const catInfoDetail = catInfo?.[catDetail as keyof typeof catInfo];
 
-  if (!catInfo || !catInfoDetail) {
+  if (!catInfo || !(catDetail in catInfo)) {
     return c.json(
       {
         success: false,
-        message: `Cat with ID '${catName}' or Datail ${catInfoDetail} not found.`
+        message: `Cat '${catName}' or detail '${catDetail}' not found.`
       },
       404
     );
   }
-  console.log(catInfoDetail);
 
-  return c.json(catInfoDetail);
+  return c.json(catInfo[catDetail as keyof typeof catInfo]);
 });
 
 export default catInfoDetailRouter;
