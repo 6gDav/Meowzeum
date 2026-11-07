@@ -10,7 +10,7 @@ function App() {
   const { data, isLoading, error } = useQuery(backendDataQueryOptions())
 
   if (isLoading) return <p>Loading...</p>
-  if (error) return <p>Error: {error.message}</p>
+  if (error) return <span color="red"><h1>Error!</h1><h3>{error.message}</h3></span>
 
   return <pre>{JSON.stringify(data, null, 2)}</pre>
 }
