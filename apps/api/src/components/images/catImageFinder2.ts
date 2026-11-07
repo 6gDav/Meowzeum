@@ -1,14 +1,19 @@
 const LIMIT = 66;
 const API_URL = `https://api.thecatapi.com/v1/images/search?limit=${LIMIT}`;
-const BACKEND_NAME = "TheCatAPI"
+const BACKEND_NAME = "TheCatAPI";
 
 async function getCatPictures2(): Promise<string[]> {
     console.log(`Cat images from ${BACKEND_NAME}.`);
 
     const catImageList: string[] = [];
-
+    const apiKey = Bun.env.CAT_API_KEY; 
+    
     try {
-        const response = await fetch(API_URL);
+        const response = await fetch(API_URL, {
+            headers: {
+                "x-api-key": apiKey || "" 
+            }
+        });
 
         if (!response.ok) {
             throw new Error(`API fault: ${response.status} ${response.statusText}`);
