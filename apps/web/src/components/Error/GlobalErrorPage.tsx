@@ -7,7 +7,7 @@ export default function GlobalErrorPage({ error, reset }: ErrorComponentProps) {
         <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
             <h1 className="text-3xl font-bold text-red-600">Ops... Error occured</h1>
             <p className="mt-2 text-gray-600">
-                {error instanceof Error ? error.message : 'Ismeretlen hiba lépett fel.'}
+                {error instanceof Error ? error.message : 'An unknown error occurred.'}
             </p>
             <div className="mt-6 flex gap-4">
                 <button onClick={() => { reset(); router.invalidate() }}
