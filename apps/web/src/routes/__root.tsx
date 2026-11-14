@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import NotFoundPage from '#/components/Error/NotFoundPage'
 import GlobalErrorPage from '#/components/Error/GlobalErrorPage'
 import appCss from '../styles.css?url'
+import Footer from '#/components/FooterHeader/Footer'
 
 const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'auto';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`
 
@@ -39,7 +40,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] w-full bg-[#fdf6e2] selection:bg-[#e5a965] selection:text-white">
         <QueryClientProvider client={queryClient}>
+          {/* <Header/> */}
           {children}
+          < Footer />
           <TanStackDevtools
             config={{ position: 'bottom-right' }}
             plugins={[
