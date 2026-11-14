@@ -9,12 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as PagesIndexRouteImport } from './routes/pages/index'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as PagesAuthRouteImport } from './routes/pages/auth'
 
-const PagesIndexRoute = PagesIndexRouteImport.update({
-  id: '/pages/',
-  path: '/pages/',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PagesAuthRoute = PagesAuthRouteImport.update({
@@ -24,38 +24,38 @@ const PagesAuthRoute = PagesAuthRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/pages/auth': typeof PagesAuthRoute
-  '/pages/': typeof PagesIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/pages/auth': typeof PagesAuthRoute
-  '/pages': typeof PagesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/pages/auth': typeof PagesAuthRoute
-  '/pages/': typeof PagesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/pages/auth' | '/pages/'
+  fullPaths: '/' | '/pages/auth'
   fileRoutesByTo: FileRoutesByTo
-  to: '/pages/auth' | '/pages'
-  id: '__root__' | '/pages/auth' | '/pages/'
+  to: '/' | '/pages/auth'
+  id: '__root__' | '/' | '/pages/auth'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   PagesAuthRoute: typeof PagesAuthRoute
-  PagesIndexRoute: typeof PagesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/pages/': {
-      id: '/pages/'
-      path: '/pages'
-      fullPath: '/pages/'
-      preLoaderRoute: typeof PagesIndexRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pages/auth': {
@@ -69,8 +69,8 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   PagesAuthRoute: PagesAuthRoute,
-  PagesIndexRoute: PagesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

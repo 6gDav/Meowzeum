@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { backendDataQueryOptions } from '../../server/functions/externalAPICall'
+import { backendDataQueryOptions } from '../server/functions/externalAPICall'
 
 import Expetion from '#/components/exeptionMaker'
 
-export const Route = createFileRoute('/pages/')({
+export const Route = createFileRoute('/')({
   component: App,
 })
 
