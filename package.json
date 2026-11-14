@@ -12,6 +12,10 @@
   "scripts": {
     "dev:api": "bun --filter api dev",
     "dev:web": "bun --filter web dev",
+    "build:web": "bun run --filter web build",
+    "start:web": "bun run --filter web start",
+    "build:api": "bun run --filter api build",
+    "start:api": "bun run --filter api start",
     "test": "vitest"
   },
   "type": "module",
