@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PagesAuthRouteImport } from './routes/pages/auth'
+import { Route as PagesHomeRouteImport } from './routes/pages/home'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const PagesAuthRoute = PagesAuthRouteImport.update({
   path: '/pages/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PagesHomeRoute = PagesHomeRouteImport.update({
+  id: '/pages/home',
+  path: '/pages/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/pages/auth': typeof PagesAuthRoute
+  '/pages/home': typeof PagesHomeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/pages/auth': typeof PagesAuthRoute
+  '/pages/home': typeof PagesHomeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/pages/auth': typeof PagesAuthRoute
+  '/pages/home': typeof PagesHomeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/pages/auth'
+  fullPaths: '/' | '/pages/auth' | '/pages/home'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/pages/auth'
-  id: '__root__' | '/' | '/pages/auth'
+  to: '/' | '/pages/auth' | '/pages/home'
+  id: '__root__' | '/' | '/pages/auth' | '/pages/home'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PagesAuthRoute: typeof PagesAuthRoute
+  PagesHomeRoute: typeof PagesHomeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PagesAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pages/home': {
+      id: '/pages/home'
+      path: '/pages/home'
+      fullPath: '/pages/home'
+      preLoaderRoute: typeof PagesHomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PagesAuthRoute: PagesAuthRoute,
+  PagesHomeRoute: PagesHomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
