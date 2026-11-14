@@ -1,88 +1,45 @@
+export default function Footer() {
+    const linkClass =
+        "text-[#e5a965] hover:text-[#fdf6e2] hover:underline transition-colors";
+    const titleClass =
+        "text-[#fdf6e2] font-bold uppercase text-sm tracking-wider mb-1";
 
-// Footer.jsx
-// Palette:
-//   #b45309 – footer background (dark amber)
-//   #d97706 – accent / hover / divider
-//   #fdf6e2 – main text (cream)
-//   #e5a965 – secondary text & links (sand)
-
-const columns = [
-    {
-        title: "Product",
-        links: [
-            { label: "Features", href: "/features" },
-            { label: "Pricing", href: "/pricing" },
-            { label: "Changelog", href: "/changelog" },
-        ],
-    },
-    {
-        title: "Company",
-        links: [
-            { label: "About", href: "/about" },
-            { label: "Blog", href: "/blog" },
-            { label: "Careers", href: "/careers" },
-        ],
-    },
-    {
-        title: "Support",
-        links: [
-            { label: "Help center", href: "/help" },
-            { label: "Contact", href: "/contact" },
-            { label: "Privacy policy", href: "/privacy" },
-        ],
-    },
-];
-
-function Footer() {
     return (
-        <footer className="bg-[#b45309] text-[#fdf6e2]">
-            <div className="mx-auto grid max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.5fr_repeat(3,1fr)]">
-                {/* Brand */}
-                <div>
-                    <a href="/" className="text-2xl font-bold tracking-tight">
-                        Brand<span className="text-[#e5a965]">Name</span>
-                    </a>
-                    <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#e5a965]">
-                        Short description of what you build and who it is for.
-                    </p>
-                </div>
+        <footer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 bg-[#b45309] text-[#fdf6e2] border-t-2 border-[#d97706] p-10 w-full">
+            <aside className="flex flex-col items-start gap-3">
+                <img
+                    // src={catImage}
+                    alt="cat-image"
+                    className="w-[120px] h-[120px] object-contain rounded-xl border-2 border-transparent hover:border-[#d97706] hover:-translate-y-[3px] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                />
+                <a
+                    className={`${linkClass} font-medium`}
+                    href="https://github.com/6gDav"
+                    target="_blank"
+                    rel="noreferrer"
+                >
+                    6gDav
+                </a>
+            </aside>
 
-                {/* Link columns */}
-                {columns.map((col) => (
-                    <nav key={col.title} aria-label={col.title}>
-                        <h3 className="text-sm font-semibold text-[#fdf6e2]">{col.title}</h3>
-                        <ul className="mt-4 space-y-3">
-                            {col.links.map((link) => (
-                                <li key={link.label}>
-                                    <a
-                                        href={link.href}
-                                        className="text-sm text-[#e5a965] transition-colors hover:text-[#fdf6e2] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fdf6e2]"
-                                    >
-                                        {link.label}
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    </nav>
-                ))}
-            </div>
+            <nav className="flex flex-col items-start gap-2">
+                <h6 className={titleClass}>Services</h6>
+                <a className={linkClass} href="https://github.com/6gDav/GetACat_Frontend" target="_blank" rel="noreferrer">Frontend Code</a>
+                <a className={linkClass} href="https://github.com/6gDav/GetACat_Backend" target="_blank" rel="noreferrer">Backend Code</a>
+                <a className={linkClass} href="#apidescription" title="A bit above">Read Documentation Here</a>
+            </nav>
 
-            {/* Bottom bar */}
-            <div className="border-t border-[#d97706]">
-                <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-5 text-sm text-[#e5a965] sm:flex-row">
-                    <p>&copy; {new Date().getFullYear()} BrandName. All rights reserved.</p>
-                    <div className="flex gap-5">
-                        <a href="/terms" className="transition-colors hover:text-[#fdf6e2]">
-                            Terms
-                        </a>
-                        <a href="/privacy" className="transition-colors hover:text-[#fdf6e2]">
-                            Privacy
-                        </a>
-                    </div>
-                </div>
-            </div>
+            <nav className="flex flex-col items-start gap-2">
+                <h6 className={titleClass}>Programming Tools</h6>
+                <a className={linkClass} href="https://tailwindcss.com/" target="_blank" rel="noreferrer">Design (Tailwind CSS)</a>
+                <a className={linkClass} href="https://developer.mozilla.org/en-US/docs/Web/CSS" target="_blank" rel="noreferrer">Design (CSS)</a>
+                <a className={linkClass} href="https://react.dev/" target="_blank" rel="noreferrer">Framework (React)</a>
+            </nav>
+
+            <nav className="flex flex-col items-start gap-2">
+                <h6 className={titleClass}>Licence</h6>
+                <a className={linkClass} href="https://opensource.org/license/mit" target="_blank" rel="noreferrer">MIT (Licence)</a>
+            </nav>
         </footer>
     );
 }
-
-export default Footer;

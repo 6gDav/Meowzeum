@@ -1,21 +1,14 @@
+
 import { useState } from "react";
-
-
+ 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const navLinks = [
-    { name: 'Home', href: '#' },
-    { name: 'Features', href: '#features' },
-    { name: 'Pricing', href: '#pricing' },
-    { name: 'About', href: '#about' },
-  ];
-
+ 
   return (
     <header className="sticky top-0 z-50 w-full bg-[#fdf6e2] border-b border-[#e5a965] shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          
+ 
           {/* Brand Logo */}
           <div className="flex-shrink-0 flex items-center">
             <a href="#" className="flex items-center gap-2 group">
@@ -23,24 +16,39 @@ const Header = () => {
                 B
               </div>
               <span className="font-bold text-xl tracking-tight text-[#b45309]">
-                BrandName
+                Meowzeum
               </span>
             </a>
           </div>
-
+ 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="text-[#b45309] hover:text-[#d97706] font-medium text-sm transition-colors duration-200"
-              >
-                {link.name}
-              </a>
-            ))}
+            <a
+              href="#"
+              className="text-[#b45309] hover:text-[#d97706] font-medium text-sm transition-colors duration-200"
+            >
+              Home
+            </a>
+            <a
+              href="#features"
+              className="text-[#b45309] hover:text-[#d97706] font-medium text-sm transition-colors duration-200"
+            >
+              Features
+            </a>
+            <a
+              href="#pricing"
+              className="text-[#b45309] hover:text-[#d97706] font-medium text-sm transition-colors duration-200"
+            >
+              Pricing
+            </a>
+            <a
+              href="#about"
+              className="text-[#b45309] hover:text-[#d97706] font-medium text-sm transition-colors duration-200"
+            >
+              About
+            </a>
           </nav>
-
+ 
           {/* Desktop Action Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             <a
@@ -56,14 +64,14 @@ const Header = () => {
               Get Started
             </a>
           </div>
-
+ 
           {/* Mobile Menu Button */}
           <div className="flex items-center md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               type="button"
               className="inline-flex items-center justify-center p-2 rounded-md text-[#b45309] hover:text-[#fdf6e2] hover:bg-[#e5a965] focus:outline-none transition-colors"
-              aria-expanded="false"
+              aria-expanded={isMobileMenuOpen}
             >
               <span className="sr-only">Open main menu</span>
               {!isMobileMenuOpen ? (
@@ -81,20 +89,35 @@ const Header = () => {
           </div>
         </div>
       </div>
-
+ 
       {/* Mobile Dropdown Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-[#fdf6e2] border-t border-[#e5a965]">
           <div className="px-4 pt-2 pb-4 space-y-1">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="block px-3 py-2 rounded-md text-base font-medium text-[#b45309] hover:bg-[#e5a965]/30 hover:text-[#d97706] transition-colors"
-              >
-                {link.name}
-              </a>
-            ))}
+            <a
+              href="#"
+              className="block px-3 py-2 rounded-md text-base font-medium text-[#b45309] hover:bg-[#e5a965]/30 hover:text-[#d97706] transition-colors"
+            >
+              Home
+            </a>
+            <a
+              href="#features"
+              className="block px-3 py-2 rounded-md text-base font-medium text-[#b45309] hover:bg-[#e5a965]/30 hover:text-[#d97706] transition-colors"
+            >
+              Features
+            </a>
+            <a
+              href="#pricing"
+              className="block px-3 py-2 rounded-md text-base font-medium text-[#b45309] hover:bg-[#e5a965]/30 hover:text-[#d97706] transition-colors"
+            >
+              Pricing
+            </a>
+            <a
+              href="#about"
+              className="block px-3 py-2 rounded-md text-base font-medium text-[#b45309] hover:bg-[#e5a965]/30 hover:text-[#d97706] transition-colors"
+            >
+              About
+            </a>
             <div className="pt-4 mt-2 border-t border-[#e5a965]/60 flex flex-col gap-2">
               <a
                 href="#login"
@@ -115,5 +138,6 @@ const Header = () => {
     </header>
   );
 };
-
+ 
 export default Header;
+ 
