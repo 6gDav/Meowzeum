@@ -1,8 +1,74 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
 
 export const Route = createFileRoute('/pages/home')({
   component: Home,
 })
+
+function GetFeaturedCat() {
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    async function loadCatImage() {
+      try {
+        const response = await fetch('http://localhost:3001/get-a-cat-image', {
+          signal: controller.signal,
+        })
+
+        if (!response.ok) {
+          throw new Error(`The cat image API returned ${response.status}.`)
+        }
+
+        const result: unknown = await response.json()
+        const imageUrls = Array.isArray(result)
+          ? result.filter((url): url is string => typeof url === 'string' && url.trim().length > 0)
+          : []
+
+        if (imageUrls.length === 0) {
+          throw new Error('The cat image API did not return any images.')
+        }
+
+        setImageUrl(imageUrls[Math.floor(Math.random() * imageUrls.length)])
+      } catch (fetchError) {
+        if (!controller.signal.aborted) {
+          setError(fetchError instanceof Error ? fetchError.message : 'Unable to load a cat image.')
+        }
+      }
+    }
+
+    void loadCatImage()
+    return () => controller.abort()
+  }, [])
+
+  return (
+    <div
+      aria-busy={!imageUrl && !error}
+      className="relative mt-10 flex aspect-[4/3] w-full max-w-3xl items-center justify-center overflow-hidden rounded-[2rem] border border-[#d97706]/25 bg-[#f7e8c7] p-5 shadow-[0_24px_70px_-35px_rgba(120,53,15,0.4)] sm:mt-14 sm:aspect-[16/8]"
+    >
+      {imageUrl ? (
+        <img
+          src={imageUrl}
+          alt="Featured cat"
+          className="absolute inset-0 size-full object-cover"
+          onError={() => {
+            setImageUrl(null)
+            setError('The selected cat image could not be displayed.')
+          }}
+        />
+      ) : (
+        <p aria-live="polite" className="max-w-sm text-sm font-semibold text-[#9a4f0a]">
+          {error ?? 'Finding a lovely cat for you...'}
+        </p>
+      )}
+      <span className="absolute left-7 top-7 rounded-full bg-[#fffaf0]/90 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#9a4f0a] sm:left-10 sm:top-10">
+        Featured
+      </span>
+    </div>
+  )
+}
 
 function Home() {
   return (
@@ -65,39 +131,7 @@ function Home() {
             Take a moment, meet a few lovely cats, and find your new favorite.
           </p>
 
-          <div
-            role="img"
-            aria-label="Placeholder for a featured cat image"
-            className="relative mt-10 flex aspect-[4/3] w-full max-w-3xl items-center justify-center overflow-hidden rounded-[2rem] border border-[#d97706]/25 bg-[#f7e8c7] p-5 shadow-[0_24px_70px_-35px_rgba(120,53,15,0.4)] sm:mt-14 sm:aspect-[16/8]"
-          >
-            <div className="absolute inset-3 rounded-[1.5rem] border border-dashed border-[#b45309]/30 sm:inset-5" />
-            <div className="relative flex max-w-xs flex-col items-center">
-              <span className="mb-5 grid size-20 place-items-center rounded-full bg-[#fffaf0] text-[#b45309] shadow-sm">
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 48 48"
-                  fill="none"
-                  className="size-10"
-                >
-                  <rect x="5" y="8" width="38" height="32" rx="6" stroke="currentColor" strokeWidth="2.5" />
-                  <circle cx="17" cy="19" r="3.5" fill="currentColor" />
-                  <path d="m9 35 10-10 7 7 5-5 8 8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-              <span className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#9a4f0a]">
-                Your featured cat goes here
-              </span>
-              <span className="mt-2 text-sm text-stone-600">
-                A lovely photo will make this space its home.
-              </span>
-            </div>
-            <span className="absolute left-7 top-7 rounded-full bg-[#fffaf0]/90 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#9a4f0a] sm:left-10 sm:top-10">
-              Featured
-            </span>
-            <span className="absolute bottom-7 right-7 text-xs font-bold tracking-widest text-[#9a4f0a]/70 sm:bottom-10 sm:right-10">
-              01 / 12
-            </span>
-          </div>
+          <GetFeaturedCat />
 
           <div id="about" className="mt-10 flex flex-col items-center gap-4 sm:flex-row">
             <Link
