@@ -20,6 +20,9 @@ export const Route = createRootRoute({
     links: [
       { rel: 'stylesheet', href: appCss },
     ],
+    scripts: [
+      { children: THEME_INIT_SCRIPT },
+    ],
   }),
   shellComponent: RootDocument,
   notFoundComponent: NotFoundPage,
@@ -32,7 +35,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] w-full bg-[#fdf6e2] selection:bg-[#e5a965] selection:text-white">

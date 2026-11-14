@@ -30,7 +30,7 @@ function RegistrationComponent({
     };
 
     return (
-        < section role="registration" className="animate-fadeIn">
+        <section role="registration" data-testid="registration-form" className="animate-fadeIn">
             <form onSubmit={handleSubmitRegistration} className="space-y-3.5">
                 {/* First & Last Name Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">

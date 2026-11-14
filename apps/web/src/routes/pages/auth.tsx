@@ -50,9 +50,11 @@ function Auth() {
                         </div>
 
                         {/* Segmented Tab Switcher */}
-                        <div className="grid grid-cols-2 p-1 mb-6 rounded-xl bg-[#fdf6e2] border border-[#d97706]/20">
+                        <div role="tablist" className="grid grid-cols-2 p-1 mb-6 rounded-xl bg-[#fdf6e2] border border-[#d97706]/20">
                             <button
                                 type="button"
+                                role="tab"
+                                aria-selected={activeTab === 'login'}
                                 onClick={() => switchTab('login')}
                                 className={`py-2 text-sm font-semibold rounded-lg transition-all duration-200 cursor-pointer ${activeTab === 'login'
                                     ? 'bg-[#d97706] text-white shadow-sm'
@@ -63,6 +65,8 @@ function Auth() {
                             </button>
                             <button
                                 type="button"
+                                role="tab"
+                                aria-selected={activeTab === 'registration'}
                                 onClick={() => switchTab('registration')}
                                 className={`py-2 text-sm font-semibold rounded-lg transition-all duration-200 cursor-pointer ${activeTab === 'registration'
                                     ? 'bg-[#d97706] text-white shadow-sm'
