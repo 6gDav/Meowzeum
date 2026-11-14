@@ -1,6 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import CursorWatchingCat from '#/components/catEye/catEye.tsx'
+import { registerUserMutation } from '#/server/functions/auth/userRegistration'
+import { loginUserMutation } from '#/server/functions/auth/userLogin'
 
 export const Route = createFileRoute('/pages/auth')({
     component: Auth,
@@ -30,6 +33,35 @@ function Auth() {
         'w-full rounded-xl border border-[#d97706]/30 bg-[#fdf6e2]/40 px-4 py-2.5 text-sm text-stone-800 placeholder-stone-400 outline-none transition-all duration-200 focus:border-[#d97706] focus:bg-white focus:ring-4 focus:ring-[#d97706]/15'
     const labelClasses = 'block text-sm font-semibold text-[#b45309] mb-1.5'
     const errorClasses = 'mt-1 text-xs font-medium text-red-600 min-h-[1rem]'
+
+    // Login
+    const mutationLogin = useMutation(loginUserMutation())
+
+    const handleSubmitLogin = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const form = new FormData(e.currentTarget)
+
+        mutationLogin.mutate({
+            email: form.get('email') as string,
+            password: form.get('password') as string,
+        })
+    };
+
+    // Registration
+    const mutationRegistration = useMutation(registerUserMutation())
+
+    const handleSubmitRegistration = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const form = new FormData(e.currentTarget)
+
+        mutationRegistration.mutate({
+            firstName: form.get('firstName') as string,
+            lastName: form.get('lastName') as string,
+            email: form.get('email') as string,
+            password: form.get('password') as string,
+            passwordConfirm: form.get('passwordConfirm') as string,
+        })
+    };
 
     return (
         <div className="min-h-screen w-full bg-[#fdf6e2] flex flex-col items-center justify-center p-4 sm:p-6  ">
@@ -78,10 +110,11 @@ function Auth() {
                         </div>
 
                         {/* Forms Container */}
+                        {/* Login */}
                         <div>
                             {activeTab === 'login' && (
                                 <section role="login" className="animate-fadeIn">
-                                    <form action="" className="space-y-4">
+                                    <form onSubmit={handleSubmitLogin} className="space-y-4">
                                         {/* Email */}
                                         <div>
                                             <label htmlFor="l-email" className={labelClasses}>
@@ -94,6 +127,7 @@ function Auth() {
                                                 placeholder="you@company.com"
                                                 required
                                                 className={inputClasses}
+                                                name="email"
                                             />
                                             <p id="l-email-err" role="alert" className={errorClasses}></p>
                                         </div>
@@ -119,6 +153,7 @@ function Auth() {
                                                     placeholder="••••••••"
                                                     required
                                                     className={`${inputClasses} pr-16`}
+                                                    name="password"
                                                 />
                                                 <button
                                                     id="l-pass-toggle"
@@ -153,9 +188,10 @@ function Auth() {
                                 </section>
                             )}
 
+                            {/* Registration */}
                             {activeTab === 'registration' && (
-                                <section role="registration" className="animate-fadeIn">
-                                    <form action="" className="space-y-3.5">
+                                < section role="registration" className="animate-fadeIn">
+                                    <form onSubmit={handleSubmitRegistration} className="space-y-3.5">
                                         {/* First & Last Name Grid */}
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                                             <div>
@@ -167,6 +203,7 @@ function Auth() {
                                                     type="text"
                                                     placeholder="Jane"
                                                     required
+                                                    name="firstName"
                                                     className={inputClasses}
                                                 />
                                                 <p id="r-first-err" role="alert" className={errorClasses}></p>
@@ -181,6 +218,7 @@ function Auth() {
                                                     type="text"
                                                     placeholder="Doe"
                                                     required
+                                                    name="lastName"
                                                     className={inputClasses}
                                                 />
                                                 <p id="r-last-err" role="alert" className={errorClasses}></p>
@@ -197,6 +235,7 @@ function Auth() {
                                                 type="email"
                                                 placeholder="you@company.com"
                                                 required
+                                                name="email"
                                                 className={inputClasses}
                                             />
                                             <p id="r-email-err" role="alert" className={errorClasses}></p>
@@ -214,6 +253,7 @@ function Auth() {
                                                     autoComplete="new-password"
                                                     placeholder="••••••••"
                                                     required
+                                                    name="password"
                                                     className={`${inputClasses} pr-16`}
                                                 />
                                                 <button
@@ -240,6 +280,7 @@ function Auth() {
                                                     autoComplete="new-password"
                                                     placeholder="••••••••"
                                                     required
+                                                    name="passwordConfirm"
                                                     className={`${inputClasses} pr-16`}
                                                 />
                                                 <button
@@ -284,6 +325,6 @@ function Auth() {
 
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
