@@ -9,68 +9,68 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthRouteImport } from './routes/auth'
+import { Route as PagesIndexRouteImport } from './routes/pages/index'
+import { Route as PagesAuthRouteImport } from './routes/pages/auth'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const PagesIndexRoute = PagesIndexRouteImport.update({
+  id: '/pages/',
+  path: '/pages/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const PagesAuthRoute = PagesAuthRouteImport.update({
+  id: '/pages/auth',
+  path: '/pages/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/pages/auth': typeof PagesAuthRoute
+  '/pages/': typeof PagesIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/pages/auth': typeof PagesAuthRoute
+  '/pages': typeof PagesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/pages/auth': typeof PagesAuthRoute
+  '/pages/': typeof PagesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth'
+  fullPaths: '/pages/auth' | '/pages/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth'
-  id: '__root__' | '/' | '/auth'
+  to: '/pages/auth' | '/pages'
+  id: '__root__' | '/pages/auth' | '/pages/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AuthRoute: typeof AuthRoute
+  PagesAuthRoute: typeof PagesAuthRoute
+  PagesIndexRoute: typeof PagesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/pages/': {
+      id: '/pages/'
+      path: '/pages'
+      fullPath: '/pages/'
+      preLoaderRoute: typeof PagesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/pages/auth': {
+      id: '/pages/auth'
+      path: '/pages/auth'
+      fullPath: '/pages/auth'
+      preLoaderRoute: typeof PagesAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AuthRoute: AuthRoute,
+  PagesAuthRoute: PagesAuthRoute,
+  PagesIndexRoute: PagesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
