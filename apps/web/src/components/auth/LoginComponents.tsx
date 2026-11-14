@@ -46,7 +46,7 @@ export default function LoginComponents({
 
                 {/* Password */}
                 <div>
-                    <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex  items-center justify-between mb-1.5">
                         <label htmlFor="l-pass" className="text-sm font-semibold text-[#b45309]">
                             Password
                         </label>

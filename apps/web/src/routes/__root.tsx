@@ -35,7 +35,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
-      <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[#e5a965] selection:text-white">
+      <body className="font-sans antialiased [overflow-wrap:anywhere] w-full bg-[#fdf6e2] selection:bg-[#e5a965] selection:text-white">
         <QueryClientProvider client={queryClient}>
           {children}
           <TanStackDevtools

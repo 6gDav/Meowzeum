@@ -28,7 +28,7 @@ function Auth() {
         setActiveTab(tab)
     }
     return (
-        <div className="min-h-screen w-full bg-[#fdf6e2] flex flex-col items-center justify-center p-4 sm:p-6  ">
+        <div className="min-h-screen  flex flex-col items-center justify-center p-4 sm:p-6  ">
             {/* Wider container for the two-column layout */}
             <div className="w-full max-w-4xl">
 
