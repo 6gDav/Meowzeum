@@ -76,6 +76,10 @@ export interface FileRouteTypes {
     | '/pages/auth'
     | '/pages/community'
     | '/pages/home'
+  fullPaths: '/' | '/pages/auth' | '/pages/home'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/pages/auth' | '/pages/home'
+  id: '__root__' | '/' | '/pages/auth' | '/pages/home'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
