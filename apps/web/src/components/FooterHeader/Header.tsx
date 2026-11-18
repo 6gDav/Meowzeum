@@ -10,7 +10,7 @@ function AuthButtons({ isMobile = false }: { isMobile?: boolean }) {
   return (
     <div className={containerClass}>
       <Link
-        to="/pages/auth" hash="login"
+        to="/pages/auth" hash="registration"
         className="block text-center px-4 py-2 rounded-md text-base font-medium text-[#b45309] border border-[#e5a965] hover:bg-[#e5a965]/20 transition-colors"
       >
         Log in
@@ -36,24 +36,24 @@ const Header = () => {
 
           {/* Brand Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <a href="#" className="flex items-center gap-2 group">
+            <Link to="/" className="flex items-center gap-2 group">
               <div className="w-8 h-8 rounded-lg bg-[#d97706] group-hover:bg-[#b45309] transition-colors flex items-center justify-center text-[#fdf6e2] font-bold text-lg">
                 B
               </div>
               <span className="font-bold text-xl tracking-tight text-[#b45309]">
                 Meowzeum
               </span>
-            </a>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
-            <a
-              href="#"
+            <Link
+              to="/"
               className="text-[#b45309] hover:text-[#d97706] font-medium text-sm transition-colors duration-200"
             >
               Home
-            </a>
+            </Link>
             <a
               href="#features"
               className="text-[#b45309] hover:text-[#d97706] font-medium text-sm transition-colors duration-200"

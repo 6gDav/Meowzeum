@@ -13,17 +13,6 @@ function Gallery() {
           id="collection"
           className="mx-auto flex max-w-7xl flex-col items-center px-5 pb-20 pt-14 text-center sm:px-8 sm:pt-20"
         >
-          <p className="mb-4 rounded-full border border-[#d97706]/20 bg-white/70 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#b45309]">
-            A little corner of the internet for cats
-          </p>
-          <h1 className="max-w-3xl font-serif text-4xl font-bold leading-tight tracking-tight text-[#713f12] sm:text-6xl">
-            Welcome to the
-            <span className="text-[#d97706]"> Meowzeum</span>
-          </h1>
-          <p className="mt-5 max-w-xl text-base leading-7 text-stone-600 sm:text-lg">
-            Take a moment, meet a few lovely cats, and find your new favorite.
-          </p>
-
           <div
             role="img"
             aria-label="Placeholder for a featured cat image"
