@@ -20,7 +20,7 @@ export const loginUserMutation = () =>
         onSuccess: (responseData, variables) => {
             console.log('Server response:', responseData.email)
 
-            console.log('Sended email:', variables.email)
+            console.log('Sent email:', variables.email)
         },
         onError: (error, variables) => {
             console.error('Unsuccesfull login:', variables.email, error)
