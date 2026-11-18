@@ -24,21 +24,21 @@ export default function Footer() {
 
             <nav className="flex flex-col items-start gap-2">
                 <h6 className={titleClass}>Services</h6>
-                <a className={linkClass} href="https://github.com/6gDav/GetACat_Frontend" target="_blank" rel="noreferrer">Frontend Code</a>
-                <a className={linkClass} href="https://github.com/6gDav/GetACat_Backend" target="_blank" rel="noreferrer">Backend Code</a>
-                <a className={linkClass} href="#apidescription" title="A bit above">Read Documentation Here</a>
+                <a className={linkClass} href="#" target="_blank" rel="noreferrer">Frontend Code</a>
+                <a className={linkClass} href="#" target="_blank" rel="noreferrer">Backend Code</a>
+                <a className={linkClass} href="#" title="A bit above">Read Documentation Here</a>
             </nav>
 
             <nav className="flex flex-col items-start gap-2">
                 <h6 className={titleClass}>Programming Tools</h6>
-                <a className={linkClass} href="https://tailwindcss.com/" target="_blank" rel="noreferrer">Design (Tailwind CSS)</a>
-                <a className={linkClass} href="https://developer.mozilla.org/en-US/docs/Web/CSS" target="_blank" rel="noreferrer">Design (CSS)</a>
-                <a className={linkClass} href="https://react.dev/" target="_blank" rel="noreferrer">Framework (React)</a>
+                <a className={linkClass} href="#" target="_blank" rel="noreferrer">Design (Tailwind CSS)</a>
+                <a className={linkClass} href="#" target="_blank" rel="noreferrer">Design (CSS)</a>
+                <a className={linkClass} href="#" target="_blank" rel="noreferrer">Framework (React)</a>
             </nav>
 
             <nav className="flex flex-col items-start gap-2">
                 <h6 className={titleClass}>Licence</h6>
-                <a className={linkClass} href="https://opensource.org/license/mit" target="_blank" rel="noreferrer">MIT (Licence)</a>
+                <a className={linkClass} href="" target="_blank" rel="noreferrer">MIT (Licence)</a>
             </nav>
         </footer>
     );

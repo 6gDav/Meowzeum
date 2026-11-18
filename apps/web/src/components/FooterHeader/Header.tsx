@@ -1,14 +1,39 @@
 
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
- 
+
+function AuthButtons({ isMobile = false }: { isMobile?: boolean }) {
+  const containerClass = isMobile
+    ? "pt-4 mt-2 border-t border-[#e5a965]/60 flex flex-col gap-2"
+    : "hidden md:flex items-center space-x-4";
+
+  return (
+    <div className={containerClass}>
+      <Link
+        to="/pages/auth" hash="login"
+        className="block text-center px-4 py-2 rounded-md text-base font-medium text-[#b45309] border border-[#e5a965] hover:bg-[#e5a965]/20 transition-colors"
+      >
+        Log in
+      </Link>
+      <Link
+        to="/pages/auth" hash="registration"
+        className="text-center bg-[#d97706] hover:bg-[#b45309] text-[#fdf6e2] font-semibold text-sm px-4 py-2 rounded-lg shadow-sm transition-all duration-200 border border-[#b45309]/20"
+      >
+        Get Started
+      </Link>
+    </div>
+  );
+}
+
+
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
- 
+
   return (
     <header className="sticky top-0 z-50 w-full bg-[#fdf6e2] border-b border-[#e5a965] shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
- 
+
           {/* Brand Logo */}
           <div className="flex-shrink-0 flex items-center">
             <a href="#" className="flex items-center gap-2 group">
@@ -20,7 +45,7 @@ const Header = () => {
               </span>
             </a>
           </div>
- 
+
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
             <a
@@ -48,23 +73,12 @@ const Header = () => {
               About
             </a>
           </nav>
- 
+
           {/* Desktop Action Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <a
-              href="#login"
-              className="text-[#b45309] hover:text-[#d97706] font-medium text-sm transition-colors"
-            >
-              Log in
-            </a>
-            <a
-              href="#signup"
-              className="bg-[#d97706] hover:bg-[#b45309] text-[#fdf6e2] font-semibold text-sm px-4 py-2 rounded-lg shadow-sm transition-all duration-200 border border-[#b45309]/20"
-            >
-              Get Started
-            </a>
+            <AuthButtons />
           </div>
- 
+
           {/* Mobile Menu Button */}
           <div className="flex items-center md:hidden">
             <button
@@ -89,7 +103,7 @@ const Header = () => {
           </div>
         </div>
       </div>
- 
+
       {/* Mobile Dropdown Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-[#fdf6e2] border-t border-[#e5a965]">
@@ -101,36 +115,25 @@ const Header = () => {
               Home
             </a>
             <a
-              href="#features"
+              href="#"
               className="block px-3 py-2 rounded-md text-base font-medium text-[#b45309] hover:bg-[#e5a965]/30 hover:text-[#d97706] transition-colors"
             >
               Features
             </a>
             <a
-              href="#pricing"
+              href="#"
               className="block px-3 py-2 rounded-md text-base font-medium text-[#b45309] hover:bg-[#e5a965]/30 hover:text-[#d97706] transition-colors"
             >
               Pricing
             </a>
             <a
-              href="#about"
+              href="#"
               className="block px-3 py-2 rounded-md text-base font-medium text-[#b45309] hover:bg-[#e5a965]/30 hover:text-[#d97706] transition-colors"
             >
               About
             </a>
             <div className="pt-4 mt-2 border-t border-[#e5a965]/60 flex flex-col gap-2">
-              <a
-                href="#login"
-                className="block text-center px-4 py-2 rounded-md text-base font-medium text-[#b45309] border border-[#e5a965] hover:bg-[#e5a965]/20 transition-colors"
-              >
-                Log in
-              </a>
-              <a
-                href="#signup"
-                className="block text-center px-4 py-2 rounded-md text-base font-medium bg-[#d97706] text-[#fdf6e2] hover:bg-[#b45309] transition-colors"
-              >
-                Get Started
-              </a>
+              <AuthButtons />
             </div>
           </div>
         </div>
@@ -138,6 +141,5 @@ const Header = () => {
     </header>
   );
 };
- 
+
 export default Header;
- 

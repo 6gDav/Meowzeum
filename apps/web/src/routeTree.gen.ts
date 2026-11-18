@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PagesAuthRouteImport } from './routes/pages/auth'
+import { Route as PagesGalleryRouteImport } from './routes/pages/gallery'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const PagesAuthRoute = PagesAuthRouteImport.update({
   path: '/pages/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PagesGalleryRoute = PagesGalleryRouteImport.update({
+  id: '/pages/gallery',
+  path: '/pages/gallery',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/pages/auth': typeof PagesAuthRoute
+  '/pages/gallery': typeof PagesGalleryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/pages/auth': typeof PagesAuthRoute
+  '/pages/gallery': typeof PagesGalleryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/pages/auth': typeof PagesAuthRoute
+  '/pages/gallery': typeof PagesGalleryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/pages/auth'
+  fullPaths: '/' | '/pages/auth' | '/pages/gallery'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/pages/auth'
-  id: '__root__' | '/' | '/pages/auth'
+  to: '/' | '/pages/auth' | '/pages/gallery'
+  id: '__root__' | '/' | '/pages/auth' | '/pages/gallery'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PagesAuthRoute: typeof PagesAuthRoute
+  PagesGalleryRoute: typeof PagesGalleryRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PagesAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pages/gallery': {
+      id: '/pages/gallery'
+      path: '/pages/gallery'
+      fullPath: '/pages/gallery'
+      preLoaderRoute: typeof PagesGalleryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PagesAuthRoute: PagesAuthRoute,
+  PagesGalleryRoute: PagesGalleryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

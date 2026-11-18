@@ -23,7 +23,7 @@ export const registerUserMutation = () =>
         onSuccess: (responseData, variables) => {
             console.log('Server response:', responseData.firstName)
 
-            console.log('Sended email:', variables.email)
+            console.log('Sent email:', variables.email)
         },
         onError: (error, variables) => {
             console.error('Unsuccesfull registration:', variables.email, error)
