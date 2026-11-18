@@ -26,6 +26,8 @@ function RegistrationComponent({
             email: form.get('email') as string,
             password: form.get('password') as string,
             passwordConfirm: form.get('passwordConfirm') as string,
+        }, {
+            onSuccess: () => switchTab('login'),
         })
     };
 
@@ -138,10 +140,17 @@ function RegistrationComponent({
                 {/* Submit */}
                 <button
                     type="submit"
-                    className="w-full py-3 px-4 rounded-xl bg-[#d97706] hover:bg-[#b45309] active:scale-[0.99] text-white font-semibold text-sm shadow-md shadow-[#d97706]/25 transition-all duration-200 cursor-pointer"
+                    disabled={mutationRegistration.isPending}
+                    className="w-full py-3 px-4 rounded-xl bg-[#d97706] hover:bg-[#b45309] active:scale-[0.99] text-white font-semibold text-sm shadow-md shadow-[#d97706]/25 transition-all duration-200 cursor-pointer disabled:opacity-60"
                 >
-                    Registration
+                    {mutationRegistration.isPending ? 'Registering...' : 'Registration'}
                 </button>
+                {mutationRegistration.isError && (
+                    <p role="alert" className={errorClasses}>{mutationRegistration.error.message}</p>
+                )}
+                {mutationRegistration.isSuccess && (
+                    <p role="status" className="text-center text-sm text-green-700">Account created successfully.</p>
+                )}
 
                 <p className="text-center text-sm text-stone-600 pt-2">
                     Already have an account?{' '}

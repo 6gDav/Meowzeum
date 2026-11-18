@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { AUTH_USER_NAME_STORAGE_KEY } from '#/components/auth/authSession'
 
 export const Route = createFileRoute('/pages/home')({
   component: Home,
@@ -71,6 +72,12 @@ function GetFeaturedCat() {
 }
 
 function Home() {
+  const [userName, setUserName] = useState<string | null>(null)
+
+  useEffect(() => {
+    setUserName(sessionStorage.getItem(AUTH_USER_NAME_STORAGE_KEY))
+  }, [])
+
   return (
     <div className="min-h-screen bg-[#fdf6e2] text-stone-800">
       <header className="border-b border-[#d97706]/15 bg-[#fffaf0]/80">
@@ -105,12 +112,21 @@ function Home() {
             >
               About
             </a>
-            <Link
-              to="/pages/auth"
-              className="rounded-full bg-[#b45309] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#92400e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b45309]"
-            >
-              Sign in
-            </Link>
+            {userName ? (
+              <span
+                className="rounded-full bg-[#b45309] px-4 py-2.5 text-sm font-bold text-white shadow-sm"
+                aria-label={`Signed in as ${userName}`}
+              >
+                {userName}
+              </span>
+            ) : (
+              <Link
+                to="/pages/auth"
+                className="rounded-full bg-[#b45309] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#92400e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b45309]"
+              >
+                Sign in
+              </Link>
+            )}
           </nav>
         </div>
       </header>

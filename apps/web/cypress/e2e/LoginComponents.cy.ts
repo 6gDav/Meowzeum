@@ -92,6 +92,29 @@ describe('Login form', () => {
         cy.get(pass).should('match', ':valid')
     })
 
+    it('redirects to the home page after a successful login', () => {
+        cy.intercept('POST', '/_serverFn/**', {
+            statusCode: 200,
+            body: {
+                success: true,
+                user: {
+                    id: '550e8400-e29b-41d4-a716-446655440000',
+                    firstName: 'Jane',
+                    lastName: 'Doe',
+                    email: 'user@example.com',
+                },
+            },
+        }).as('login')
+
+        cy.get(email).type('user@example.com')
+        cy.get(pass).type('secret123', { log: false })
+        submit()
+
+        cy.wait('@login')
+        cy.location('pathname').should('eq', '/pages/home')
+        cy.contains('Jane Doe').should('be.visible')
+    })
+
     it('has a link to the registration form', () => {
         cy.contains('a', 'Create an account')
             .should('be.visible')

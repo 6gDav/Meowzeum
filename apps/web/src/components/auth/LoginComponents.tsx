@@ -1,6 +1,8 @@
 import React from 'react'
 import { styles, type ComponetsFormProps } from './CommonInterfaces'
 import { useMutation } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router'
+import { AUTH_USER_NAME_STORAGE_KEY } from './authSession'
 import { loginUserMutation } from '#/server/functions/auth/userLogin';
 
 export default function LoginComponents({
@@ -11,6 +13,7 @@ export default function LoginComponents({
     const inputClasses = styles.input;
     const labelClasses = styles.label;
     const errorClasses = styles.error;
+    const navigate = useNavigate()
 
     const mutationLogin = useMutation(loginUserMutation())
 
@@ -21,6 +24,16 @@ export default function LoginComponents({
         mutationLogin.mutate({
             email: form.get('email') as string,
             password: form.get('password') as string,
+        }, {
+            onSuccess: ({ user }) => {
+                sessionStorage.setItem(
+                    AUTH_USER_NAME_STORAGE_KEY,
+                    `${user.firstName} ${user.lastName}`,
+                )
+                void navigate({
+                    to: '/pages/home',
+                })
+            },
         })
     };
 
@@ -82,10 +95,17 @@ export default function LoginComponents({
                 {/* Submit */}
                 <button
                     type="submit"
-                    className="w-full py-3 px-4 rounded-xl bg-[#d97706] hover:bg-[#b45309] active:scale-[0.99] text-white font-semibold text-sm shadow-md shadow-[#d97706]/25 transition-all duration-200 cursor-pointer"
+                    disabled={mutationLogin.isPending}
+                    className="w-full py-3 px-4 rounded-xl bg-[#d97706] hover:bg-[#b45309] active:scale-[0.99] text-white font-semibold text-sm shadow-md shadow-[#d97706]/25 transition-all duration-200 cursor-pointer disabled:opacity-60"
                 >
-                    Login
+                    {mutationLogin.isPending ? 'Logging in...' : 'Login'}
                 </button>
+                {mutationLogin.isError && (
+                    <p role="alert" className={errorClasses}>{mutationLogin.error.message}</p>
+                )}
+                {mutationLogin.isSuccess && (
+                    <p role="status" className="text-center text-sm text-green-700">Login successful.</p>
+                )}
 
                 <p className="text-center text-sm text-stone-600 pt-2">
                     New to Meowzeum?{' '}

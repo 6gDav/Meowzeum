@@ -100,6 +100,19 @@ describe('Registration form', () => {
         })
     })
 
+    it('switches to login after successful registration', () => {
+        cy.intercept('POST', '/_serverFn/**', {
+            statusCode: 200,
+            body: { success: true },
+        }).as('register')
+
+        fillForm()
+        cy.get('button[type="submit"]').click()
+
+        cy.wait('@register')
+        cy.get('section[role="login"]').should('be.visible')
+    })
+
     it('handles a server error without crashing', () => {
         cy.intercept('POST', '/_serverFn/**', {
             statusCode: 500,
