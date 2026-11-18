@@ -22,6 +22,13 @@ export const Header = () => {
                 >
                     Home
                 </Link>
+                <Link
+                    to="/pages/community"
+                    className="rounded-full px-2 py-2 text-xs font-semibold text-stone-600 transition hover:text-[#b45309] sm:px-3 sm:text-sm"
+                >
+                    <span className="sm:hidden">Feed</span>
+                    <span className="hidden sm:inline">Community</span>
+                </Link>
                 <a
                     href="#collection"
                     className="hidden rounded-full px-3 py-2 text-sm font-semibold text-stone-600 transition hover:text-[#b45309] sm:inline-flex"
