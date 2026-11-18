@@ -132,9 +132,9 @@ const Header = () => {
             >
               About
             </a>
-            <div className="pt-4 mt-2 border-t border-[#e5a965]/60 flex flex-col gap-2">
-              <AuthButtons />
-            </div>
+
+            {/* Pass isMobile here */}
+            <AuthButtons isMobile />
           </div>
         </div>
       )}
