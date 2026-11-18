@@ -1,19 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
-import { backendDataQueryOptions } from '../server/functions/externalAPICall'
-
-import Expetion from '#/components/exeptionMaker'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/')({
-  component: App,
+  beforeLoad: () => {
+    throw redirect({ to: '/pages/auth' })
+  },
 })
-
-function App() {
-  const { data, isLoading, error } = useQuery(backendDataQueryOptions())
-  Expetion();
-
-  if (isLoading) return <p color="blue">Loading...</p>
-  if (error) return <p color="red">Error: {error.message}</p>
-
-  return <pre>{JSON.stringify(data, null, 2)}</pre>
-}
