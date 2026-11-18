@@ -1,5 +1,5 @@
 import { createFileRoute, useLocation, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import CursorWatchingCat from '#/components/catEye/catEye.tsx'
 import RegistrationComponent from '#/components/auth/RegistrationComponent'
 import LoginComponents from '#/components/auth/LoginComponents'
@@ -15,9 +15,8 @@ function Auth() {
     const location = useLocation()
     const navigate = useNavigate({ from: Route.fullPath })
 
-    const [activeTab, setActiveTab] = useState<Tab>(() =>
-        location.hash === 'registration' ? 'registration' : 'login'
-    )
+    // Az aktív tab közvetlenül a hash-ből jön, így külső linkek is működnek
+    const activeTab: Tab = location.hash === 'registration' ? 'registration' : 'login'
 
     const [visible, setVisible] = useState<Record<PasswordField, boolean>>({
         loginPass: false,
@@ -25,22 +24,17 @@ function Auth() {
         regConfirm: false,
     })
 
-    // Sync active tab when URL hash changes
-    useEffect(() => {
-        if (location.hash === 'registration') {
-            setActiveTab('registration')
-        } else if (location.hash === 'login') {
-            setActiveTab('login')
-        }
-    }, [location.hash])
-
     const toggleVisible = (field: PasswordField) =>
         setVisible((prev) => ({ ...prev, [field]: !prev[field] }))
 
     const switchTab = (tab: Tab) => {
         setVisible({ loginPass: false, regPass: false, regConfirm: false })
-        setActiveTab(tab)
-        navigate({ hash: tab, replace: true })
+        navigate({
+            hash: tab,
+            replace: true,
+            hashScrollIntoView: false, 
+            resetScroll: false,        
+        })
     }
 
     return (
