@@ -99,3 +99,9 @@ Here 👉 https://www.youtube.com/watch?v=nCKdihvneS0
 | perf | Performance optimization | 
 | test | Testing |
 | chore | Maintenance, dependencies, tooling, etc | 
+
+## 🖼️ Colors 
+//   #b45309 – footer background (dark amber)
+//   #d97706 – accent / hover / divider
+//   #fdf6e2 – main text (cream)
+//   #e5a965 – secondary text & links (sand)

@@ -1,5 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { createFileRoute, useLocation, useNavigate } from '@tanstack/react-router'
+import { useState, useEffect } from 'react'
 import CursorWatchingCat from '#/components/catEye/catEye.tsx'
 import RegistrationComponent from '#/components/auth/RegistrationComponent'
 import LoginComponents from '#/components/auth/LoginComponents'
@@ -12,7 +12,12 @@ export type Tab = 'login' | 'registration'
 export type PasswordField = 'loginPass' | 'regPass' | 'regConfirm'
 
 function Auth() {
-    const [activeTab, setActiveTab] = useState<Tab>('login')
+    const location = useLocation()
+    const navigate = useNavigate({ from: Route.fullPath })
+
+    const [activeTab, setActiveTab] = useState<Tab>(() =>
+        location.hash === 'registration' ? 'registration' : 'login'
+    )
 
     const [visible, setVisible] = useState<Record<PasswordField, boolean>>({
         loginPass: false,
@@ -20,20 +25,34 @@ function Auth() {
         regConfirm: false,
     })
 
+    // Sync active tab when URL hash changes
+    useEffect(() => {
+        if (location.hash === 'registration') {
+            setActiveTab('registration')
+        } else if (location.hash === 'login') {
+            setActiveTab('login')
+        }
+    }, [location.hash])
+
     const toggleVisible = (field: PasswordField) =>
         setVisible((prev) => ({ ...prev, [field]: !prev[field] }))
 
     const switchTab = (tab: Tab) => {
         setVisible({ loginPass: false, regPass: false, regConfirm: false })
         setActiveTab(tab)
+        navigate({ hash: tab, replace: true })
     }
+
     return (
-        <div className="min-h-screen  flex flex-col items-center justify-center p-4 sm:p-6  ">
+        <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6">
             {/* Wider container for the two-column layout */}
             <div className="w-full max-w-4xl">
 
                 {/* Main Auth Card - 2-column grid */}
-                <div className="w-full rounded-2xl bg-white/85 backdrop-blur-md shadow-xl shadow-[#b45309]/10 border border-[#d97706]/20 p-6 sm:p-8 grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch">
+                <div
+                    id="auth-card"
+                    className="w-full rounded-2xl bg-white/85 backdrop-blur-md shadow-xl shadow-[#b45309]/10 border border-[#d97706]/20 p-6 sm:p-8 grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch scroll-mt-20"
+                >
 
                     {/* LEFT SIDE: Form (7 columns wide) */}
                     <div className="md:col-span-7 flex flex-col justify-center">
@@ -77,9 +96,8 @@ function Auth() {
                             </button>
                         </div>
 
-                        {/* Forms Container */}
-                        {/* Login */}
-                        <div>
+                        {/* Forms Container - Persistent anchor target */}
+                        <div id={activeTab} className="scroll-mt-24">
                             {activeTab === 'login' && (
                                 <LoginComponents
                                     visible={visible}
@@ -88,7 +106,6 @@ function Auth() {
                                 />
                             )}
 
-                            {/* Registration */}
                             {activeTab === 'registration' && (
                                 <RegistrationComponent
                                     visible={visible}
@@ -106,6 +123,6 @@ function Auth() {
 
                 </div>
             </div>
-        </div >
+        </div>
     )
 }
