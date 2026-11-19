@@ -7,10 +7,20 @@ type LoginInput = {
     password: string
 }
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 const loginUserFunc = createServerFn({ method: 'POST' })
-    .validator((data: LoginInput) => data)
+    .validator((data: LoginInput) => {
+        if (!data.email || !data.password) {
+            throw new Error('Email and password are required')
+        }
+        if (!emailRegex.test(data.email)) {
+            throw new Error('Invalid email format')
+        }
+        return data
+    })
     .handler(async ({ data }) => {
-        const { email, password } = data
+        const { email } = data
         return { success: true, email }
     })
 
