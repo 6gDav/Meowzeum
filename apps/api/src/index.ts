@@ -1,7 +1,6 @@
-import { Hono } from 'hono'
+import { Context, Hono, type Next } from 'hono'
 import { logger } from 'hono/logger'
-import { cors } from 'hono/cors'
-import authCors from './components/corsMiddleware'
+import {authCors} from './components/corsMiddleware'
 import catImagesRouter from './components/routes/catImages'
 import catInfoRouter from './components/routes/catInfo'
 import catInfoDetailRouter from './components/routes/catInfoDetail'
@@ -12,11 +11,6 @@ type Variables = {
 }
 
 export const app = new Hono<{ Variables: Variables }>()
-
-const publicCors = cors({
-  origin: '*',
-  allowMethods: ['GET'],
-})
 
 app.use('*', (c, next) =>
   c.req.path.startsWith('/auth') ? next() : publicCors(c, next),
@@ -41,3 +35,7 @@ export default {
   hostname: '0.0.0.0',
   fetch: app.fetch,
 }
+function publicCors(c: Context<{ Variables: Variables }, "*", any>, next: Next): Promise<any> {
+  throw new Error('Function not implemented.')
+}
+
