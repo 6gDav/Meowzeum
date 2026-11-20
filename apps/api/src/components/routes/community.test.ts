@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Database } from 'bun:sqlite'
-import { initializeCommunitySchema } from '../communitySchema'
 import { createCommunityRouter } from './community'
 
 describe('community routes', () => {
