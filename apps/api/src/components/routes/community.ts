@@ -119,13 +119,8 @@ export function createCommunityRouter()
         if (!author || author.length > 40) return c.json({ error: 'Author must be between 1 and 40 characters.' }, 400)
         if (!validImageUrl(imageUrl)) return c.json({ error: 'Please provide a valid HTTPS image URL.' }, 400)
         if (caption.length > 500) return c.json({ error: 'Caption must be 500 characters or fewer.' }, 400)
-        
-        // get the next post id
-        const conn2 = await db.prepare(`${postQuery}`)
-        const numberOfRows = (await conn2.all()).length
 
         const post = {
-          id: numberOfRows,
           author,
           imageUrl,
           caption,
@@ -133,8 +128,8 @@ export function createCommunityRouter()
         }
         
         // execute
-        const conn3 = await db.prepare(`INSERT INTO cat_posts (id, author, image_url, caption, created_at) VALUES (?, ?, ?, ?, ?)`)
-        await conn3.run([post.id, post.author, post.imageUrl, post.caption, post.createdAt])
+        const conn3 = await db.prepare(`INSERT INTO cat_posts (author, image_url, caption, created_at) VALUES (?, ?, ?, ?)`)
+        await conn3.run([post.author, post.imageUrl, post.caption, post.createdAt])
 
         return c.json({ post: { ...post, likeCount: 0, likedByViewer: false } }, 201)
     })
