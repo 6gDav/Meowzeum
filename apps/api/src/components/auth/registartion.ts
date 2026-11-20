@@ -3,6 +3,7 @@ import type { Context } from "hono";
 import { setCookie } from "hono/cookie";
 import { sign } from "hono/jwt";
 import { RegistrationInputSchema } from "@Meowzeum/shared-types";
+import { join } from "path";
 
 const turso = createClient({
     url: process.env.TURSO_DATABASE_URL!,
@@ -13,8 +14,9 @@ const JWT_SECRET = process.env.SECRET_JWT!;
 const TOKEN_TTL_SECONDS = 60 * 60 * 24; // 1 day
 
 // Default avatar. (Costume avatar coming soon {or not})
+const avatarPath = join(import.meta.dir, "../assets/default-avatar.png");
 const DEFAULT_PICTURE = new Uint8Array(
-    await Bun.file("./assets/default-avatar.png").arrayBuffer(),
+    await Bun.file(avatarPath).arrayBuffer(),
 );
 
 export async function registrateUser(c: Context) {
