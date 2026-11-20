@@ -1,13 +1,13 @@
 import { Hono } from 'hono'
 import { db } from '../db'
 
-type PostRow = {
+/*type PostRow = {
     id: string
     author: number
     imageUrl: string
     caption: string
     createdAt: string
-}
+}*/
 
 const postQuery = `SELECT
     p.id,
