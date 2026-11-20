@@ -10,7 +10,7 @@ function AuthButtons({ isMobile = false }: { isMobile?: boolean }) {
   return (
     <div className={containerClass}>
       <Link
-        to="/pages/auth" hash="registration"
+        to="/pages/auth" hash="login"
         className="block text-center px-4 py-2 rounded-md text-base font-medium text-[#b45309] border border-[#e5a965] hover:bg-[#e5a965]/20 transition-colors"
       >
         Log in
