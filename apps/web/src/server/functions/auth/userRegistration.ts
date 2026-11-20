@@ -3,17 +3,6 @@ import { setResponseHeader } from '@tanstack/react-start/server'
 import { mutationOptions } from '@tanstack/react-query'
 import { type RegistrationInput } from '@Meowzeum/shared-types'
 
-const API_URL =
-    process.env.API_URL ??
-    (process.env.NODE_ENV === 'production'
-        ? 'https://meowzeum-api.onrender.com'
-        : 'http://localhost:3001')
-
-const INTERNAL_API_KEY = import.meta.env.VITE_INTERNAL_API_KEY
-if (!INTERNAL_API_KEY) {
-    throw new Error('INTERNAL_API_KEY is not set')
-}
-
 const registerUserFunc = createServerFn({ method: 'POST' })
     .validator((data: RegistrationInput) => {
         if (!data.firstName || !data.lastName) {
@@ -28,6 +17,18 @@ const registerUserFunc = createServerFn({ method: 'POST' })
         return data
     })
     .handler(async ({ data }) => {
+        // Csak itt, a szerveroldali handlerben olvassuk ki őket!
+        const API_URL =
+            process.env.API_URL ??
+            (process.env.NODE_ENV === 'production'
+                ? 'https://meowzeum-api.onrender.com'
+                : 'http://localhost:3001')
+
+        const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY
+        if (!INTERNAL_API_KEY) {
+            throw new Error('INTERNAL_API_KEY is not set')
+        }
+
         const res = await fetch(`${API_URL}/auth/registration`, {
             method: 'POST',
             headers: {
