@@ -43,11 +43,13 @@ export async function registrateUser(c: Context) {
     const passwordHash = await Bun.password.hash(password);
 
     // 3) Insertion
+    // const uuid = crypto.randomUUID();
     let userId: number;
     try {
         const result = await turso.execute({
             sql: `INSERT INTO users (firstName, lastName, email, password_hash, picture)
-            VALUES (?, ?, ?, ?, ?)`,
+                  VALUES (?, ?, ?, ?, ?)`,
+            // uuid later: ad to belove
             args: [firstName, lastName, normalizedEmail, passwordHash, DEFAULT_PICTURE],
         });
         userId = Number(result.lastInsertRowid);
@@ -62,13 +64,13 @@ export async function registrateUser(c: Context) {
     // 4) JWT + HttpOnly cookie
     const now = Math.floor(Date.now() / 1000);
     const token = await sign(
-        { sub: String(userId), email: normalizedEmail, iat: now, exp: now + TOKEN_TTL_SECONDS },
+        { sub: String(userId) /* uuid later: sub: uuid */, email: normalizedEmail, iat: now, exp: now + TOKEN_TTL_SECONDS },
         JWT_SECRET,
     );
 
     setCookie(c, "token", token, {
         httpOnly: true,
-        secure: true,        
+        secure: true,
         sameSite: "None",
         path: "/",
         maxAge: TOKEN_TTL_SECONDS,
@@ -76,7 +78,7 @@ export async function registrateUser(c: Context) {
 
     // 5) Succesfull response
     return c.json(
-        { success: true, data: { id: userId, firstName, lastName, email: normalizedEmail } },
+        { success: true, data: { /*uuid,*/ firstName, lastName, email: normalizedEmail } },
         201,
     );
 }
