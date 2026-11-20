@@ -1,8 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
+import { getRequestHeader } from '@tanstack/react-start/server'
 
 export type CommunityPost = {
   id: number
-  author: number
+  author: string
   imageUrl: string
   caption: string
   createdAt: string
@@ -17,18 +18,16 @@ export type CommunityPage = {
 
 type FeedRequest = {
   cursor: string | null
-  viewerId: number
 }
 
 type CreatePostRequest = {
-  author: number
+  author: string
   imageUrl: string
   caption: string
 }
 
 type LikeRequest = {
   postId: number
-  viewerId: number
   liked: boolean
 }
 
@@ -36,22 +35,36 @@ type ApiError = {
   error?: string
 }
 
+type CommunityUser = {
+  id: number
+  firstName: string
+  lastName: string
+}
+
 const apiBaseUrl = (process.env.MEOWZEUM_API_URL ?? 'http://127.0.0.1:3001').replace(/\/+$/, '')
 
 async function requestApi<T>(path: string, init?: RequestInit): Promise<T> {
-    const response = await fetch(`${apiBaseUrl}${path}`, init)
+    const headers = new Headers(init?.headers)
+    const cookie = getRequestHeader('cookie')
+    if (cookie) headers.set('Cookie', cookie)
+
+    const response = await fetch(`${apiBaseUrl}${path}`, { ...init, headers })
     const result = await response.json() as T & ApiError
 
-    if (!response.ok)
-    {
+    if (!response.ok) {
         throw new Error(result.error ?? `The community API returned ${response.status}.`)
     }
 
     return result
 }
 
+const getCommunitySession = createServerFn({ method: 'GET' }).handler(async () => {
+    const result = await requestApi<{ user: CommunityUser | null }>('/auth/session')
+    return result
+})
+
 const getCommunityPage = createServerFn({ method: 'GET' }).validator((data: FeedRequest) => data).handler(async ({ data }) => {
-    const query = new URLSearchParams({ viewerId: data.viewerId.toString(), limit: '8' })
+    const query = new URLSearchParams({ limit: '8' })
     if (data.cursor) query.set('cursor', data.cursor)
 
     return requestApi<CommunityPage>(`/community/posts?${query}`)
@@ -69,8 +82,8 @@ const setCommunityPostLike = createServerFn({ method: 'POST' }).validator((data:
     return requestApi<{ liked: boolean; likeCount: number }>(`/community/posts/${encodeURIComponent(data.postId)}/like`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ viewerId: data.viewerId, liked: data.liked }),
+        body: JSON.stringify({ liked: data.liked }),
     })
 })
 
-export { createCommunityPost, getCommunityPage, setCommunityPostLike }
+export { createCommunityPost, getCommunityPage, getCommunitySession, setCommunityPostLike }

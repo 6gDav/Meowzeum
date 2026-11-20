@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { db } from '../db'
+import { getSessionUserId } from '../authSession'
 
 /*type PostRow = {
     id: string
@@ -48,13 +49,18 @@ export function createCommunityRouter()
 
     // get posts with optional cursor and limit query parameters
     router.get('/community/posts', async (c) => {
-        const viewerId = c.req.query('viewerId') ?? 0
+        const sessionUserId = getSessionUserId(c.req.header('cookie'))
+        let viewerUserId: number | null = null
+        if (sessionUserId) {
+            const user = await (await db.prepare('SELECT id FROM users WHERE id = ?')).get([sessionUserId])
+            if (user) viewerUserId = sessionUserId
+        }
         const cursor = c.req.query('cursor')
         const requestedLimit = Number(c.req.query('limit') ?? 8)
 
         if ((cursor !== undefined && cursor.length > 128))
         {
-            return c.json({ error: 'Invalid feed cursor or viewer id.' }, 400)
+            return c.json({ error: 'Invalid feed cursor.' }, 400)
         }
 
         const limit = Number.isInteger(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 20) : 8
@@ -67,7 +73,7 @@ export function createCommunityRouter()
             GROUP BY p.id
             ORDER BY p.created_at DESC, p.id DESC
             LIMIT ?`)
-        const rows = await conn.all([viewerId, cursor ?? null, cursor ?? null, cursor ?? null, cursor ?? null, limit + 1])
+        const rows = await conn.all([viewerUserId, cursor ?? null, cursor ?? null, cursor ?? null, cursor ?? null, limit + 1])
 
         const hasMore = rows.length > limit
         const posts = rows.slice(0, limit).map((post) => ({
@@ -83,6 +89,12 @@ export function createCommunityRouter()
     
     // create new post
     router.post('/community/posts', async (c) => {
+        const sessionUserId = getSessionUserId(c.req.header('cookie'))
+        if (!sessionUserId) return c.json({ error: 'Sign in to create community posts.' }, 401)
+
+        const user = await (await db.prepare('SELECT id FROM users WHERE id = ?')).get([sessionUserId])
+        if (!user) return c.json({ error: 'Sign in to create community posts.' }, 401)
+
         if (!c.req.header('content-type')?.includes('application/json'))
         {
             return c.json({ error: 'Content-Type must be application/json.' }, 415)
@@ -99,12 +111,12 @@ export function createCommunityRouter()
         }
 
         const body = parseJsonBody(rawBody)
-        const author = typeof body?.author === 'number' ? body.author : -1
+        const author = typeof body?.author === 'string' ? body.author.trim() : ''
         const caption = typeof body?.caption === 'string' ? body.caption.trim() : ''
         const imageUrl = body?.imageUrl
         
         // parameter validation
-        if (!author || author < 0) return c.json({ error: 'Author must be a valid number.' }, 400)
+        if (!author || author.length > 40) return c.json({ error: 'Author must be between 1 and 40 characters.' }, 400)
         if (!validImageUrl(imageUrl)) return c.json({ error: 'Please provide a valid HTTPS image URL.' }, 400)
         if (caption.length > 500) return c.json({ error: 'Caption must be 500 characters or fewer.' }, 400)
         
@@ -142,12 +154,15 @@ export function createCommunityRouter()
       }
 
       const body = parseJsonBody(rawBody)
-      const viewerId = typeof body?.viewerId === 'number' ? body.viewerId : -1
       const liked = body?.liked
       const postId = c.req.param('id')
 
-      // validate user id and like state
-      if (!viewerId || viewerId < 0 || typeof liked !== 'boolean') return c.json({ error: 'A valid viewer id and like state are required.' }, 400)
+      const sessionUserId = getSessionUserId(c.req.header('cookie'))
+      if (!sessionUserId) return c.json({ error: 'Sign in to like community posts.' }, 401)
+      if (typeof liked !== 'boolean') return c.json({ error: 'A valid like state is required.' }, 400)
+
+      const user = await (await db.prepare('SELECT id FROM users WHERE id = ?')).get([sessionUserId])
+      if (!user) return c.json({ error: 'Sign in to like community posts.' }, 401)
 
       const conn = await db.prepare('SELECT id FROM cat_posts WHERE id = ?',)
       const postExists = await conn.get([postId])
@@ -158,12 +173,12 @@ export function createCommunityRouter()
           const conn = await db.prepare(`INSERT INTO cat_post_likes (post_id, visitor_id, created_at)
               VALUES (?, ?, ?)
               ON CONFLICT (post_id, visitor_id) DO NOTHING`)
-          await conn.run([postId, viewerId, new Date().toISOString()])
+          await conn.run([postId, sessionUserId, new Date().toISOString()])
       }
       else
       {
           const conn = await db.prepare('DELETE FROM cat_post_likes WHERE post_id = ? AND visitor_id = ?')
-          await conn.run([postId, viewerId])
+          await conn.run([postId, sessionUserId])
       }
       
       // get like count for display

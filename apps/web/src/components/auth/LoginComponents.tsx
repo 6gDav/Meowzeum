@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from '@tanstack/react-router'
 import { styles, type ComponetsFormProps } from './CommonInterfaces'
 import { useMutation } from '@tanstack/react-query';
 import { loginUserMutation } from '#/server/functions/auth/userLogin';
@@ -82,10 +83,22 @@ export default function LoginComponents({
                 {/* Submit */}
                 <button
                     type="submit"
-                    className="w-full py-3 px-4 rounded-xl bg-[#d97706] hover:bg-[#b45309] active:scale-[0.99] text-white font-semibold text-sm shadow-md shadow-[#d97706]/25 transition-all duration-200 cursor-pointer"
+                    disabled={mutationLogin.isPending}
+                    className="w-full py-3 px-4 rounded-xl bg-[#d97706] hover:bg-[#b45309] active:scale-[0.99] text-white font-semibold text-sm shadow-md shadow-[#d97706]/25 transition-all duration-200 cursor-pointer disabled:opacity-60"
                 >
-                    Login
+                    {mutationLogin.isPending ? 'Signing in…' : 'Login'}
                 </button>
+                {mutationLogin.isError && (
+                    <p role="alert" className="text-sm font-semibold text-red-700">
+                        {mutationLogin.error.message}
+                    </p>
+                )}
+                {mutationLogin.isSuccess && (
+                    <p role="status" className="text-sm font-semibold text-green-800">
+                        You are signed in.{' '}
+                        <Link to="/pages/community" className="underline">Return to the community</Link>
+                    </p>
+                )}
 
                 <p className="text-center text-sm text-stone-600 pt-2">
                     New to Meowzeum?{' '}
