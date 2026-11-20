@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import catDatabase from "../cats.json";
-import limiter from "../rateLimiter";
+import limiter from "../middlewares/rateLimiter";
 
 const catInfoRouter = new Hono();
 

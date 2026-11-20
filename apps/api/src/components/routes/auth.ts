@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import limiter from "../rateLimiter";
+import limiter from "../middlewares/rateLimiter";
 import { registrateUser } from "../auth/registartion";
 import { loginUser } from "../auth/login";
 

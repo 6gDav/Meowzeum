@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import getCatPictures from "../images/catImageFinder";
 import getCatPictures2 from "../images/catImageFinder2"
-import limiter from "../rateLimiter";
+import limiter from "../middlewares/rateLimiter";
 
 const catImagesRouter = new Hono();
 

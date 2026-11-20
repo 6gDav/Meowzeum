@@ -1,10 +1,11 @@
 import { Context, Hono, type Next } from 'hono'
 import { logger } from 'hono/logger'
-import {authCors} from './components/corsMiddleware'
 import catImagesRouter from './components/routes/catImages'
 import catInfoRouter from './components/routes/catInfo'
 import catInfoDetailRouter from './components/routes/catInfoDetail'
 import authRouter from './components/routes/auth'
+import internalOnly from './components/middlewares/internalOnly'
+import { publicCors } from './components/middlewares/corsMiddleware'
 
 type Variables = {
   catImages: string[]
@@ -12,22 +13,24 @@ type Variables = {
 
 export const app = new Hono<{ Variables: Variables }>()
 
+//middlewars
+app.use('*', logger())
+
 app.use('*', (c, next) =>
   c.req.path.startsWith('/auth') ? next() : publicCors(c, next),
 )
 
-app.use('/auth/*', authCors)
-
-app.use('*', logger())
-
+app.use('/auth/*', internalOnly)
 app.get('/favicon.ico', (c) => c.body(null, 204))
 
+//routes
 app.route('/', catImagesRouter)
 app.route('/', catInfoRouter)
 app.route('/', catInfoDetailRouter)
 
 app.route('/auth', authRouter)
 
+//setup port
 const port = parseInt(process.env.PORT || '3001')
 
 export default {
@@ -35,7 +38,5 @@ export default {
   hostname: '0.0.0.0',
   fetch: app.fetch,
 }
-function publicCors(c: Context<{ Variables: Variables }, "*", any>, next: Next): Promise<any> {
-  throw new Error('Function not implemented.')
-}
+
 
