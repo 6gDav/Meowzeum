@@ -13,6 +13,7 @@
   "dependencies": {
     "@Meowzeum/shared-types": "workspace:*",
     "@hono/zod-validator": "^0.9.1",
+    "@libsql/client": "^0.18.0",
     "hono": "^4.13.14"
   },
   "scripts": {
