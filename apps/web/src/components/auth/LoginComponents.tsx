@@ -1,28 +1,34 @@
 import React from 'react'
 import { styles, type ComponetsFormProps } from './CommonInterfaces'
-import { useMutation } from '@tanstack/react-query';
-import { loginUserMutation } from '#/server/functions/auth/userLogin';
+import { useMutation } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
+import { loginUserMutation } from '#/server/functions/auth/userLogin'
 
 export default function LoginComponents({
     visible,
     toggleVisible,
     switchTab,
 }: ComponetsFormProps) {
-    const inputClasses = styles.input;
-    const labelClasses = styles.label;
-    const errorClasses = styles.error;
+    const inputClasses = styles.input
+    const labelClasses = styles.label
+    const errorClasses = styles.error
 
-    const mutationLogin = useMutation(loginUserMutation())
+    const navigate = useNavigate()
+
+    const mutationLogin = useMutation({
+        ...loginUserMutation(),
+        onSuccess: () => navigate({ to: '/' }),
+    })
 
     const handleSubmitLogin = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+        e.preventDefault()
         const form = new FormData(e.currentTarget)
 
         mutationLogin.mutate({
             email: form.get('email') as string,
             password: form.get('password') as string,
         })
-    };
+    }
 
     return (
         <section role="login" className="animate-fadeIn" id="registration">
@@ -46,7 +52,7 @@ export default function LoginComponents({
 
                 {/* Password */}
                 <div>
-                    <div className="flex  items-center justify-between mb-1.5">
+                    <div className="flex items-center justify-between mb-1.5">
                         <label htmlFor="l-pass" className="text-sm font-semibold text-[#b45309]">
                             Password
                         </label>
@@ -79,12 +85,20 @@ export default function LoginComponents({
                     <p id="l-pass-err" role="alert" className={errorClasses}></p>
                 </div>
 
+                {/* Server error (wrong credentials, etc.) */}
+                {mutationLogin.isError && (
+                    <p role="alert" className={errorClasses}>
+                        {mutationLogin.error.message}
+                    </p>
+                )}
+
                 {/* Submit */}
                 <button
                     type="submit"
-                    className="w-full py-3 px-4 rounded-xl bg-[#d97706] hover:bg-[#b45309] active:scale-[0.99] text-white font-semibold text-sm shadow-md shadow-[#d97706]/25 transition-all duration-200 cursor-pointer"
+                    disabled={mutationLogin.isPending}
+                    className="w-full py-3 px-4 rounded-xl bg-[#d97706] hover:bg-[#b45309] active:scale-[0.99] text-white font-semibold text-sm shadow-md shadow-[#d97706]/25 transition-all duration-200 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                    Login
+                    {mutationLogin.isPending ? 'Logging in…' : 'Login'}
                 </button>
 
                 <p className="text-center text-sm text-stone-600 pt-2">
