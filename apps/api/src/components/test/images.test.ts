@@ -1,7 +1,12 @@
+import './mockEnv'
 import { describe, it, expect, vi } from 'vitest'
 import { app } from '../../index'
 
 import catDatabase from "../cats.json";
+
+vi.mock('@libsql/client', () => ({
+  createClient: () => ({ execute: vi.fn() })
+}))
 
 vi.mock('../images/catImageFinder', () => {
   return {
