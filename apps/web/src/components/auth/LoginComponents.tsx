@@ -31,7 +31,7 @@ export default function LoginComponents({
     }
 
     return (
-        <section role="login" className="animate-fadeIn" id="registration">
+        <section role="login" className="animate-fadeIn">
             <form onSubmit={handleSubmitLogin} className="space-y-4">
                 {/* Email */}
                 <div>

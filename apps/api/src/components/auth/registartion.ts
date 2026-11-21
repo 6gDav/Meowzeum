@@ -14,7 +14,7 @@ const JWT_SECRET = process.env.SECRET_JWT!;
 const TOKEN_TTL_SECONDS = 60 * 60 * 24; // 1 day
 
 // Default avatar. (Costume avatar coming soon {or not})
-const avatarPath = join(import.meta.dir, "../assets/default-avatar.png");
+const avatarPath = join(import.meta.dirname, "../assets/default-avatar.png");
 const DEFAULT_PICTURE = new Uint8Array(
     await Bun.file(avatarPath).arrayBuffer(),
 );
