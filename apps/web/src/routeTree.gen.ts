@@ -11,7 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PagesAuthRouteImport } from './routes/pages/auth'
-import { Route as PagesGalleryRouteImport } from './routes/pages/gallery'
+import { Route as PagesHomeRouteImport } from './routes/pages/home'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,40 +23,40 @@ const PagesAuthRoute = PagesAuthRouteImport.update({
   path: '/pages/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PagesGalleryRoute = PagesGalleryRouteImport.update({
-  id: '/pages/gallery',
-  path: '/pages/gallery',
+const PagesHomeRoute = PagesHomeRouteImport.update({
+  id: '/pages/home',
+  path: '/pages/home',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/pages/auth': typeof PagesAuthRoute
-  '/pages/gallery': typeof PagesGalleryRoute
+  '/pages/home': typeof PagesHomeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/pages/auth': typeof PagesAuthRoute
-  '/pages/gallery': typeof PagesGalleryRoute
+  '/pages/home': typeof PagesHomeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/pages/auth': typeof PagesAuthRoute
-  '/pages/gallery': typeof PagesGalleryRoute
+  '/pages/home': typeof PagesHomeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/pages/auth' | '/pages/gallery'
+  fullPaths: '/' | '/pages/auth' | '/pages/home'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/pages/auth' | '/pages/gallery'
-  id: '__root__' | '/' | '/pages/auth' | '/pages/gallery'
+  to: '/' | '/pages/auth' | '/pages/home'
+  id: '__root__' | '/' | '/pages/auth' | '/pages/home'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PagesAuthRoute: typeof PagesAuthRoute
-  PagesGalleryRoute: typeof PagesGalleryRoute
+  PagesHomeRoute: typeof PagesHomeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,11 +75,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PagesAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/pages/gallery': {
-      id: '/pages/gallery'
-      path: '/pages/gallery'
-      fullPath: '/pages/gallery'
-      preLoaderRoute: typeof PagesGalleryRouteImport
+    '/pages/home': {
+      id: '/pages/home'
+      path: '/pages/home'
+      fullPath: '/pages/home'
+      preLoaderRoute: typeof PagesHomeRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -88,7 +88,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PagesAuthRoute: PagesAuthRoute,
-  PagesGalleryRoute: PagesGalleryRoute,
+  PagesHomeRoute: PagesHomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
