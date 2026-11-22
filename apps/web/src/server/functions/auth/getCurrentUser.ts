@@ -3,7 +3,6 @@ import { getRequestHeader } from '@tanstack/react-start/server'
 import { queryOptions } from '@tanstack/react-query'
 
 export type AuthUser = {
-  id: number
   firstName: string
   lastName: string
   email: string

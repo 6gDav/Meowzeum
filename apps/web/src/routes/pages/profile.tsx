@@ -1,7 +1,11 @@
-
 import React, { useEffect, useRef, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { styles } from '#/components/CommonInterfaces'
+import {
+    currentUserQueryOptions,
+    type AuthUser,
+} from '#/server/functions/auth/getCurrentUser'
 
 export const Route = createFileRoute('/pages/profile')({
     component: ManageUserPage,
@@ -10,21 +14,18 @@ export const Route = createFileRoute('/pages/profile')({
 type Field = 'firstName' | 'lastName' | 'email' | 'password' | 'passwordConfirm'
 type FieldErrors = Partial<Record<Field, string>>
 
-type UserDatails = {
-    firstName: string
-    lastName: string
-    email: string
-}
-
-// TODO: replace with the real current user once the backend is connected
-const INITIAL_USER: UserDatails = {
-    firstName: 'Jhon',
-    lastName: 'Doe',
-    email: 'you@company.com',
-}
+const EMPTY_USER: AuthUser = { firstName: '', lastName: '', email: '' }
 
 const toggleBtn =
     'absolute right-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 text-xs font-semibold text-[#b45309] bg-[#fdf6e2] hover:bg-[#d97706]/20 rounded-md transition-colors cursor-pointer'
+
+const FIELD_IDS: Record<Field, string> = {
+    firstName: 'm-first',
+    lastName: 'm-last',
+    email: 'm-email',
+    password: 'm-pass',
+    passwordConfirm: 'm-confirm',
+}
 
 function ManageUserPage() {
     const inputClasses = styles.input
@@ -33,7 +34,9 @@ function ManageUserPage() {
 
     const navigate = useNavigate()
 
-    const [user, setUser] = useState<UserDatails>(INITIAL_USER)
+    const { data: currentUser } = useSuspenseQuery(currentUserQueryOptions())
+
+    const [user, setUser] = useState<AuthUser>(currentUser ?? EMPTY_USER)
 
     const fileRef = useRef<HTMLInputElement>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -43,12 +46,19 @@ function ManageUserPage() {
     const [confirmingDelete, setConfirmingDelete] = useState(false)
     const [saved, setSaved] = useState(false)
 
-    // Release object URLs created for the local preview
+    const [formKey, setFormKey] = useState(0)
+
+    useEffect(() => {
+        if (!currentUser) navigate({ to: '/pages/auth' })
+    }, [currentUser, navigate])
+
     useEffect(() => {
         return () => {
             if (previewUrl) URL.revokeObjectURL(previewUrl)
         }
     }, [previewUrl])
+
+    if (!currentUser) return null
 
     const initials =
         `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase() || '?'
@@ -69,12 +79,13 @@ function ManageUserPage() {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setSaved(false)
-        const form = new FormData(e.currentTarget)
+        const formEl = e.currentTarget
+        const form = new FormData(formEl)
 
         const values = {
             firstName: String(form.get('firstName') ?? '').trim(),
             lastName: String(form.get('lastName') ?? '').trim(),
-            email: String(form.get('email') ?? '').trim(),
+            email: String(form.get('email') ?? '').trim().toLowerCase(),
             password: String(form.get('password') ?? ''),
             passwordConfirm: String(form.get('passwordConfirm') ?? ''),
         }
@@ -82,24 +93,40 @@ function ManageUserPage() {
         const errs: FieldErrors = {}
         if (!values.firstName) errs.firstName = 'First name is required'
         if (!values.lastName) errs.lastName = 'Last name is required'
-        if (!/^\S+@\S+\.\S+$/.test(values.email)) errs.email = 'Enter a valid email address'
+        if (!/^\S+@\S+\.\S+$/.test(values.email))
+            errs.email = 'Enter a valid email address'
         if (values.password && values.password.length < 8)
             errs.password = 'Password must be at least 8 characters'
         if (values.password !== values.passwordConfirm)
             errs.passwordConfirm = 'Passwords do not match'
 
-        if (Object.keys(errs).length > 0) {
+        const errorKeys = Object.keys(errs) as Field[]
+        if (errorKeys.length > 0) {
             setFieldErrors(errs)
+            
+            const order: Field[] = [
+                'firstName',
+                'lastName',
+                'email',
+                'password',
+                'passwordConfirm',
+            ]
+            const first = order.find((f) => errs[f])
+            if (first) formEl.querySelector<HTMLInputElement>(`#${FIELD_IDS[first]}`)?.focus()
             return
         }
 
         setFieldErrors({})
-        // TODO: call the update mutation here
+        // TODO: call the update mutation here, and on success:
+        // queryClient.invalidateQueries({ queryKey: ['currentUser'] })
         setUser({
             firstName: values.firstName,
             lastName: values.lastName,
             email: values.email,
         })
+        setShowPass(false)
+        setShowConfirm(false)
+        setFormKey((k) => k + 1)
         setSaved(true)
     }
 
@@ -127,7 +154,7 @@ function ManageUserPage() {
                 </p>
 
                 <form
-                    key={user.email /* reset defaults after a save */}
+                    key={formKey}
                     onSubmit={handleSubmit}
                     noValidate
                     className="space-y-3.5 mt-6"
@@ -195,7 +222,7 @@ function ManageUserPage() {
                                 name="firstName"
                                 defaultValue={user.firstName}
                                 aria-invalid={!!fieldErrors.firstName}
-                                aria-describedby="m-first-err"
+                                aria-describedby={fieldErrors.firstName ? 'm-first-err' : undefined}
                                 className={inputClasses}
                             />
                             <p id="m-first-err" role="alert" className={errorClasses}>
@@ -215,7 +242,7 @@ function ManageUserPage() {
                                 name="lastName"
                                 defaultValue={user.lastName}
                                 aria-invalid={!!fieldErrors.lastName}
-                                aria-describedby="m-last-err"
+                                aria-describedby={fieldErrors.lastName ? 'm-last-err' : undefined}
                                 className={inputClasses}
                             />
                             <p id="m-last-err" role="alert" className={errorClasses}>
@@ -237,7 +264,7 @@ function ManageUserPage() {
                             name="email"
                             defaultValue={user.email}
                             aria-invalid={!!fieldErrors.email}
-                            aria-describedby="m-email-err"
+                            aria-describedby={fieldErrors.email ? 'm-email-err' : undefined}
                             className={inputClasses}
                         />
                         <p id="m-email-err" role="alert" className={errorClasses}>
@@ -258,13 +285,14 @@ function ManageUserPage() {
                                 placeholder="Leave empty to keep current"
                                 name="password"
                                 aria-invalid={!!fieldErrors.password}
-                                aria-describedby="m-pass-err"
+                                aria-describedby={fieldErrors.password ? 'm-pass-err' : undefined}
                                 className={`${inputClasses} pr-16`}
                             />
                             <button
                                 id="m-pass-toggle"
                                 type="button"
                                 onClick={() => setShowPass((v) => !v)}
+                                aria-pressed={showPass}
                                 className={toggleBtn}
                             >
                                 {showPass ? 'Hide' : 'Show'}
@@ -288,13 +316,16 @@ function ManageUserPage() {
                                 placeholder="••••••••"
                                 name="passwordConfirm"
                                 aria-invalid={!!fieldErrors.passwordConfirm}
-                                aria-describedby="m-confirm-err"
+                                aria-describedby={
+                                    fieldErrors.passwordConfirm ? 'm-confirm-err' : undefined
+                                }
                                 className={`${inputClasses} pr-16`}
                             />
                             <button
                                 id="m-confirm-toggle"
                                 type="button"
                                 onClick={() => setShowConfirm((v) => !v)}
+                                aria-pressed={showConfirm}
                                 className={toggleBtn}
                             >
                                 {showConfirm ? 'Hide' : 'Show'}
