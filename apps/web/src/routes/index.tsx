@@ -1,4 +1,4 @@
-import { Link, createFileRoute, redirect } from "@tanstack/react-router"
+import { Link, createFileRoute } from "@tanstack/react-router"
 import CursorWatchingCat from "#/components/catEye/catEye"
 
 export const Route = createFileRoute('/')({
@@ -74,7 +74,3 @@ function Home() {
     </div>
   )
 }
-  beforeLoad: () => {
-    throw redirect({ to: '/pages/auth' })
-  }
-})
