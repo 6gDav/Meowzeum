@@ -13,7 +13,7 @@ function AuthButtons({ isMobile = false }: { isMobile?: boolean }) {
 
   return user ? (
     <Link
-      to="/pages/managgeUser"
+      to="/pages/profile"
       data-testid="header-profile-button"
       className="flex items-center gap-2.5 pl-1 pr-3 py-1 rounded-full bg-[#fdf6e2]/70 hover:bg-[#d97706]/15 border border-[#d97706]/30 transition-colors cursor-pointer"
     >

@@ -12,7 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PagesAuthRouteImport } from './routes/pages/auth'
 import { Route as PagesGalleryRouteImport } from './routes/pages/gallery'
-import { Route as PagesManaggeUserRouteImport } from './routes/pages/managgeUser'
+import { Route as PagesProfileRouteImport } from './routes/pages/profile'
 import { Route as PagesWelcomePageRouteImport } from './routes/pages/welcomePage'
 
 const IndexRoute = IndexRouteImport.update({
@@ -30,9 +30,9 @@ const PagesGalleryRoute = PagesGalleryRouteImport.update({
   path: '/pages/gallery',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PagesManaggeUserRoute = PagesManaggeUserRouteImport.update({
-  id: '/pages/managgeUser',
-  path: '/pages/managgeUser',
+const PagesProfileRoute = PagesProfileRouteImport.update({
+  id: '/pages/profile',
+  path: '/pages/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PagesWelcomePageRoute = PagesWelcomePageRouteImport.update({
@@ -45,14 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/pages/auth': typeof PagesAuthRoute
   '/pages/gallery': typeof PagesGalleryRoute
-  '/pages/managgeUser': typeof PagesManaggeUserRoute
+  '/pages/profile': typeof PagesProfileRoute
   '/pages/welcomePage': typeof PagesWelcomePageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/pages/auth': typeof PagesAuthRoute
   '/pages/gallery': typeof PagesGalleryRoute
-  '/pages/managgeUser': typeof PagesManaggeUserRoute
+  '/pages/profile': typeof PagesProfileRoute
   '/pages/welcomePage': typeof PagesWelcomePageRoute
 }
 export interface FileRoutesById {
@@ -60,7 +60,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/pages/auth': typeof PagesAuthRoute
   '/pages/gallery': typeof PagesGalleryRoute
-  '/pages/managgeUser': typeof PagesManaggeUserRoute
+  '/pages/profile': typeof PagesProfileRoute
   '/pages/welcomePage': typeof PagesWelcomePageRoute
 }
 export interface FileRouteTypes {
@@ -69,21 +69,21 @@ export interface FileRouteTypes {
     | '/'
     | '/pages/auth'
     | '/pages/gallery'
-    | '/pages/managgeUser'
+    | '/pages/profile'
     | '/pages/welcomePage'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/pages/auth'
     | '/pages/gallery'
-    | '/pages/managgeUser'
+    | '/pages/profile'
     | '/pages/welcomePage'
   id:
     | '__root__'
     | '/'
     | '/pages/auth'
     | '/pages/gallery'
-    | '/pages/managgeUser'
+    | '/pages/profile'
     | '/pages/welcomePage'
   fileRoutesById: FileRoutesById
 }
@@ -91,7 +91,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PagesAuthRoute: typeof PagesAuthRoute
   PagesGalleryRoute: typeof PagesGalleryRoute
-  PagesManaggeUserRoute: typeof PagesManaggeUserRoute
+  PagesProfileRoute: typeof PagesProfileRoute
   PagesWelcomePageRoute: typeof PagesWelcomePageRoute
 }
 
@@ -118,11 +118,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PagesGalleryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/pages/managgeUser': {
-      id: '/pages/managgeUser'
-      path: '/pages/managgeUser'
-      fullPath: '/pages/managgeUser'
-      preLoaderRoute: typeof PagesManaggeUserRouteImport
+    '/pages/profile': {
+      id: '/pages/profile'
+      path: '/pages/profile'
+      fullPath: '/pages/profile'
+      preLoaderRoute: typeof PagesProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pages/welcomePage': {
@@ -139,7 +139,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PagesAuthRoute: PagesAuthRoute,
   PagesGalleryRoute: PagesGalleryRoute,
-  PagesManaggeUserRoute: PagesManaggeUserRoute,
+  PagesProfileRoute: PagesProfileRoute,
   PagesWelcomePageRoute: PagesWelcomePageRoute,
 }
 export const routeTree = rootRouteImport

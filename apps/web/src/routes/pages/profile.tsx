@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { styles } from '#/components/CommonInterfaces'
 
-export const Route = createFileRoute('/pages/managgeUser')({
+export const Route = createFileRoute('/pages/profile')({
     component: ManageUserPage,
 })
 
