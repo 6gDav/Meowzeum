@@ -1,6 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseHeader } from '@tanstack/react-start/server'
-import { setResponseHeader } from '@tanstack/react-start/server'
 import { mutationOptions } from '@tanstack/react-query'
 import { LoginInputSchema, type LoginInput } from '@Meowzeum/shared-types'
 
@@ -38,7 +37,7 @@ export const loginUserMutation = () =>
     mutationOptions({
         mutationFn: (data: LoginInput) => loginUserFunc({ data }),
         onSuccess: (responseData, variables) => {
-            console.log('Server response:', responseData.firstName)
+            console.log('Server response:', responseData.user.firstName)
             console.log('Sent email:', variables.email)
         },
         onError: (error, variables) => {
