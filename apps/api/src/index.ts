@@ -25,7 +25,7 @@ app.route('/', catImagesRouter)     // :: /get-a-cat-image => http://localhost:3
 app.route('/', catInfoRouter)       // :: /get-a-cat-info/:name => http://localhost:3001/get-a-cat-info/Ragdoll
 app.route('/', catInfoDetailRouter) // :: /get-a-cat-info-datail/get-all-names/ => http://localhost:3001/get-a-cat-info-datail/get-all-names/
                                     // :: //get-a-cat-info-datail/:name/:datail => http://localhost:3001/get-a-cat-info-datail/Ragdoll/lifespan
-app.route('/auth', createAuthRouter())
+app.route('/', createAuthRouter())
 app.route('/', createCommunityRouter())
 
 const port = parseInt(process.env.PORT || '3001')
