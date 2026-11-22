@@ -61,6 +61,7 @@ export async function registrateUser(c: Context) {
         return c.json({ success: false, error: "Internal server error" }, 500);
     }
 
+    //!todo refactor this to ather file
     // 4) JWT + HttpOnly cookie
     const now = Math.floor(Date.now() / 1000);
     const token = await sign(
@@ -78,7 +79,16 @@ export async function registrateUser(c: Context) {
 
     // 5) Succesfull response
     return c.json(
-        { success: true, data: { /*uuid,*/ firstName, lastName, email: normalizedEmail } },
+        {
+            success: true,
+            data:
+            {
+                /*uuid,*/
+                firstName,
+                lastName,
+                email: normalizedEmail
+            }
+        },
         201,
     );
 }

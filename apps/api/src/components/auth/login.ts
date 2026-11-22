@@ -3,14 +3,8 @@ import type { Context } from "hono";
 import { setCookie } from "hono/cookie";
 import { sign } from "hono/jwt";
 import { LoginInputSchema } from "@Meowzeum/shared-types";
+import { JWT_SECRET, TOKEN_TTL_SECONDS, turso } from "./helper/tursoClient";
 
-const turso = createClient({
-    url: process.env.TURSO_DATABASE_URL!,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-});
-
-const JWT_SECRET = process.env.SECRET_JWT!;
-const TOKEN_TTL_SECONDS = 60 * 60 * 24; // 1 day
 
 //secure dummy hash
 const DUMMY_HASH = await Bun.password.hash("dummy-password-for-timing");
@@ -66,6 +60,7 @@ export async function loginUser(c: Context) {
         return c.json(INVALID_CREDENTIALS, 401);
     }
 
+    //!todo refactor this to ather file
     // 4) JWT + HttpOnly cookie
     const now = Math.floor(Date.now() / 1000);
     const token = await sign(
@@ -83,7 +78,14 @@ export async function loginUser(c: Context) {
 
     // 5) Successful response
     return c.json(
-        { success: true, data: { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email } },
+        {
+            success: true, data:
+            {
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email
+            }
+        },
         200,
     );
 }

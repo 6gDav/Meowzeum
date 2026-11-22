@@ -1,5 +1,8 @@
-import { useState } from 'react'
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+import {
+  HeadContent,
+  Scripts,
+  createRootRouteWithContext,
+} from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -9,22 +12,27 @@ import GlobalErrorPage from '#/components/Error/GlobalErrorPage'
 import appCss from '../styles.css?url'
 import Footer from '#/components/FooterHeader/Footer'
 import Header from '#/components/FooterHeader/Header'
+import { currentUserQueryOptions } from '#/server/functions/auth/getCurrentUser'
 
 const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'auto';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  queryClient: QueryClient
+}>()({
+  beforeLoad: async ({ context }) => {
+    const user = await context.queryClient.ensureQueryData(
+      currentUserQueryOptions()
+    )
+    return { user }
+  },
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { title: 'TanStack Start Starter' },
     ],
-    links: [
-      { rel: 'stylesheet', href: appCss },
-    ],
-    scripts: [
-      { children: THEME_INIT_SCRIPT },
-    ],
+    links: [{ rel: 'stylesheet', href: appCss }],
+    scripts: [{ children: THEME_INIT_SCRIPT }],
   }),
   shellComponent: RootDocument,
   notFoundComponent: NotFoundPage,
@@ -32,7 +40,7 @@ export const Route = createRootRoute({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient())
+  const { queryClient } = Route.useRouteContext()
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -41,9 +49,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] w-full bg-[#fdf6e2] selection:bg-[#e5a965] selection:text-white">
         <QueryClientProvider client={queryClient}>
-          <Header/>
+          <Header />
           {children}
-          < Footer />
+          <Footer />
           <TanStackDevtools
             config={{ position: 'bottom-right' }}
             plugins={[

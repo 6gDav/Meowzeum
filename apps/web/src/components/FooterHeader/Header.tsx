@@ -1,22 +1,30 @@
 
+import { currentUserQueryOptions } from "#/server/functions/auth/getCurrentUser";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 function AuthButtons({ isMobile = false }: { isMobile?: boolean }) {
+  const { data: user } = useSuspenseQuery(currentUserQueryOptions());
+
   const containerClass = isMobile
     ? "pt-4 mt-2 border-t border-[#e5a965]/60 flex flex-col gap-2"
     : "hidden md:flex items-center space-x-4";
 
-  return (
+  return user ? (
+    <p>{user.firstName}</p>
+  ) : (
     <div className={containerClass}>
       <Link
-        to="/pages/auth" hash="login"
+        to="/pages/auth"
+        hash="login"
         className="block text-center px-4 py-2 rounded-md text-base font-medium text-[#b45309] border border-[#e5a965] hover:bg-[#e5a965]/20 transition-colors"
       >
         Log in
       </Link>
       <Link
-        to="/pages/auth" hash="registration"
+        to="/pages/auth"
+        hash="registration"
         className="text-center bg-[#d97706] hover:bg-[#b45309] text-[#fdf6e2] font-semibold text-sm px-4 py-2 rounded-lg shadow-sm transition-all duration-200 border border-[#b45309]/20"
       >
         Get Started
@@ -24,7 +32,6 @@ function AuthButtons({ isMobile = false }: { isMobile?: boolean }) {
     </div>
   );
 }
-
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

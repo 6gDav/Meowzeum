@@ -1,5 +1,5 @@
 import React from 'react'
-import { styles, type ComponetsFormProps } from './CommonInterfaces'
+import { styles, type ComponetsFormProps } from '../CommonInterfaces'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { loginUserMutation } from '#/server/functions/auth/userLogin'
