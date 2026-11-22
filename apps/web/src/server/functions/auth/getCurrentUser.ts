@@ -23,6 +23,19 @@ export const getCurrentUserFunc = createServerFn({ method: 'GET' }).handler(
     const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY
     if (!INTERNAL_API_KEY) throw new Error('INTERNAL_API_KEY is not set')
 
+    const url = `${API_URL.replace(/\/$/, '')}/auth/me`
+    console.log('Fetching:', url)
+
+    const res2 = await fetch(url, {
+      method: 'GET',
+      headers: {
+        cookie: cookieHeader,
+        'x-internal-key': INTERNAL_API_KEY,
+      },
+    })
+
+    console.log('Status:', res2.status)
+
     const res = await fetch(`${API_URL}/auth/me`, {
       method: 'GET',
       headers: {

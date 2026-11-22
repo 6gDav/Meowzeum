@@ -8,6 +8,6 @@ const authRouter = new Hono();
 
 authRouter.post("/registration", limiter(5), registrateUser);
 authRouter.post("/login", limiter(5), loginUser);
-authRouter.post("/me", limiter(5), getMe)
+authRouter.get("/me", limiter(5), getMe)
 
 export default authRouter;
