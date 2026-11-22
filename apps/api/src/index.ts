@@ -3,6 +3,8 @@ import { logger } from 'hono/logger'
 import catImagesRouter from './components/routes/catImages'
 import catInfoRouter from './components/routes/catInfo'
 import catInfoDetailRouter from './components/routes/catInfoDetail'
+import { createCommunityRouter } from './components/routes/community'
+import { createAuthRouter } from './components/routes/auth'
 import authRouter from './components/routes/auth'
 import internalOnly from './components/middlewares/internalOnly'
 import { publicCors } from './components/middlewares/corsMiddleware'
@@ -13,7 +15,10 @@ type Variables = {
 
 export const app = new Hono<{ Variables: Variables }>()
 
-//middlewars
+app.use('*', cors({
+  origin: '*',
+  allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+}))
 app.use('*', logger())
 
 app.use('*', (c, next) =>
@@ -28,7 +33,8 @@ app.route('/', catImagesRouter)
 app.route('/', catInfoRouter)
 app.route('/', catInfoDetailRouter)
 
-app.route('/auth', authRouter)
+app.route('/auth', createAuthRouter())
+app.route('/', createCommunityRouter())
 
 //setup port
 const port = parseInt(process.env.PORT || '3001')

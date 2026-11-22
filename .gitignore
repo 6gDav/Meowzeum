@@ -39,3 +39,10 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 #tanstack
 .tanstack/
+/.vs/Meowzeum.slnx/FileContentIndex
+/.vs/Meowzeum.slnx/v18
+/.vs/slnx.sqlite
+/.vs/VSWorkspaceState.json
+/.vs/slnx.sqlite
+/.vs/slnx.sqlite
+/bun.lock

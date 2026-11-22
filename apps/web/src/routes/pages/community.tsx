@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Header } from '#/components/webComps/header'
 import {
   createCommunityPost,
   getCommunityPage,
+  getCommunitySession,
   setCommunityPostLike,
   type CommunityPost,
 } from '#/server/functions/community'
@@ -13,12 +14,10 @@ export const Route = createFileRoute('/pages/community')({
   component: Community,
 })
 
-const viewerStorageKey = 'meowzeum-community-viewer'
 const displayNameStorageKey = 'meowzeum-community-display-name'
 
 function Community() {
   const queryClient = useQueryClient()
-  const [viewerId, setViewerId] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [caption, setCaption] = useState('')
@@ -26,24 +25,21 @@ function Community() {
   const loadMoreRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    let storedViewerId = localStorage.getItem(viewerStorageKey)
-    if (!storedViewerId) {
-      storedViewerId = crypto.randomUUID()
-      localStorage.setItem(viewerStorageKey, storedViewerId)
-    }
-
-    setViewerId(storedViewerId)
     setDisplayName(localStorage.getItem(displayNameStorageKey) ?? '')
   }, [])
 
+  const sessionQuery = useQuery({
+    queryKey: ['community-session'],
+    queryFn: getCommunitySession,
+  })
+
   const feedQuery = useInfiniteQuery({
-    queryKey: ['community-posts', viewerId],
+    queryKey: ['community-posts'],
     queryFn: ({ pageParam }) => getCommunityPage({
-      data: { cursor: pageParam, viewerId },
+      data: { cursor: pageParam },
     }),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    enabled: Boolean(viewerId),
   })
 
   const postMutation = useMutation({
@@ -52,7 +48,7 @@ function Community() {
       setImageUrl('')
       setCaption('')
       setFormError('')
-      await queryClient.invalidateQueries({ queryKey: ['community-posts', viewerId] })
+      await queryClient.invalidateQueries({ queryKey: ['community-posts'] })
     },
     onError: (error) => setFormError(error.message),
   })
@@ -61,7 +57,7 @@ function Community() {
     mutationFn: setCommunityPostLike,
     onSuccess: (result, variables) => {
       queryClient.setQueryData(
-        ['community-posts', viewerId],
+        ['community-posts'],
         (current: typeof feedQuery.data) => {
           if (!current) return current
           return {
@@ -98,6 +94,11 @@ function Community() {
     event.preventDefault()
     setFormError('')
 
+    if (!sessionQuery.data?.user) {
+      setFormError('Sign in before sharing a cat photo.')
+      return
+    }
+
     const author = displayName.trim()
     if (!author || author.length > 40) {
       setFormError('Choose a display name between 1 and 40 characters.')
@@ -125,9 +126,9 @@ function Community() {
   }
 
   function toggleLike(post: CommunityPost) {
-    if (likeMutation.isPending || !viewerId) return
+    if (likeMutation.isPending || !sessionQuery.data?.user) return
     likeMutation.mutate({
-      data: { postId: post.id, viewerId, liked: !post.likedByViewer },
+      data: { postId: post.id, liked: !post.likedByViewer },
     })
   }
 
@@ -170,6 +171,11 @@ function Community() {
                 Your like could not be saved: {likeMutation.error.message}
               </p>
             )}
+            {sessionQuery.isError && (
+              <p role="alert" className="rounded-2xl border border-red-200 bg-white px-4 py-3 text-sm text-red-800">
+                Sign-in status could not be checked: {sessionQuery.error.message}
+              </p>
+            )}
 
             {posts.map((post) => (
               <article key={post.id} className="overflow-hidden rounded-3xl border border-[#d97706]/15 bg-white shadow-sm shadow-[#713f12]/5">
@@ -196,7 +202,7 @@ function Community() {
                   <button
                     type="button"
                     onClick={() => toggleLike(post)}
-                    disabled={likeMutation.isPending || !viewerId}
+                    disabled={likeMutation.isPending || sessionQuery.isPending || !sessionQuery.data?.user}
                     aria-label={`${post.likedByViewer ? 'Unlike' : 'Like'} photo by ${post.author}`}
                     aria-pressed={post.likedByViewer}
                     className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b45309] disabled:opacity-60 ${post.likedByViewer ? 'bg-rose-50 text-rose-600' : 'bg-[#fdf6e2] text-[#9a4f0a] hover:bg-[#f7e8c7]'}`}
@@ -206,6 +212,12 @@ function Community() {
                     </svg>
                     {post.likeCount} {post.likeCount === 1 ? 'like' : 'likes'}
                   </button>
+                  {!sessionQuery.isPending && !sessionQuery.isError && !sessionQuery.data?.user && (
+                    <p className="mt-2 text-sm text-stone-500">
+                      <Link to="/pages/auth" className="font-bold text-[#b45309] underline">Sign in</Link>
+                      {' '}to like this photo.
+                    </p>
+                  )}
                   {post.caption && (
                     <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-stone-700">
                       <span className="mr-2 font-extrabold text-[#713f12]">{post.author}</span>
@@ -235,6 +247,12 @@ function Community() {
             <p className="mt-1 text-sm leading-6 text-stone-500">
               Add a photo link and a little story for the community.
             </p>
+            {!sessionQuery.isPending && !sessionQuery.isError && !sessionQuery.data?.user ? (
+              <p className="mt-4 text-sm leading-6 text-stone-600">
+                <Link to="/pages/auth" className="font-bold text-[#b45309] underline">Sign in</Link>
+                {' '}to share a cat photo with the community.
+              </p>
+            ) : (
             <form onSubmit={submitPost} className="mt-5 space-y-4">
               <label className="block text-sm font-bold text-stone-700">
                 Your display name
@@ -272,12 +290,13 @@ function Community() {
               {formError && <p role="alert" className="text-sm font-semibold text-red-700">{formError}</p>}
               <button
                 type="submit"
-                disabled={postMutation.isPending || !viewerId}
+                disabled={postMutation.isPending || sessionQuery.isPending || !sessionQuery.data?.user}
                 className="w-full rounded-full bg-[#b45309] px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#92400e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b45309] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {postMutation.isPending ? 'Sharing…' : 'Share with the community'}
               </button>
             </form>
+            )}
           </aside>
         </div>
       </main>
