@@ -4,6 +4,7 @@ import { setCookie } from "hono/cookie";
 import { sign } from "hono/jwt";
 import { LoginInputSchema } from "@Meowzeum/shared-types";
 import { JWT_SECRET, TOKEN_TTL_SECONDS, turso } from "./helper/tursoClient";
+import { createSessionResponse } from "./helper/setupJWT";
 
 
 //secure dummy hash
@@ -60,32 +61,5 @@ export async function loginUser(c: Context) {
         return c.json(INVALID_CREDENTIALS, 401);
     }
 
-    //!todo refactor this to ather file
-    // 4) JWT + HttpOnly cookie
-    const now = Math.floor(Date.now() / 1000);
-    const token = await sign(
-        { sub: String(user.id), email: user.email, iat: now, exp: now + TOKEN_TTL_SECONDS },
-        JWT_SECRET,
-    );
-
-    setCookie(c, "token", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "None",
-        path: "/",
-        maxAge: TOKEN_TTL_SECONDS,
-    });
-
-    // 5) Successful response
-    return c.json(
-        {
-            success: true, data:
-            {
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email
-            }
-        },
-        200,
-    );
+    return createSessionResponse(c, user);
 }

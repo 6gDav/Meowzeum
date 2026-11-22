@@ -1,20 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { styles } from '#/components/CommonInterfaces'
-import {
-    currentUserQueryOptions,
-    type AuthUser,
-} from '#/server/functions/auth/getCurrentUser'
+import { styles, type Field, type FieldErrors } from '#/components/CommonInterfaces'
+import { currentUserQueryOptions } from '#/server/functions/auth/getCurrentUser'
+import type { SessionJWT } from '@Meowzeum/shared-types'
 
 export const Route = createFileRoute('/pages/profile')({
     component: ManageUserPage,
 })
 
-type Field = 'firstName' | 'lastName' | 'email' | 'password' | 'passwordConfirm'
-type FieldErrors = Partial<Record<Field, string>>
-
-const EMPTY_USER: AuthUser = { firstName: '', lastName: '', email: '' }
+const EMPTY_USER: SessionJWT = { firstName: '', lastName: '', email: '' }
 
 const toggleBtn =
     'absolute right-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 text-xs font-semibold text-[#b45309] bg-[#fdf6e2] hover:bg-[#d97706]/20 rounded-md transition-colors cursor-pointer'
@@ -36,7 +31,7 @@ function ManageUserPage() {
 
     const { data: currentUser } = useSuspenseQuery(currentUserQueryOptions())
 
-    const [user, setUser] = useState<AuthUser>(currentUser ?? EMPTY_USER)
+    const [user, setUser] = useState<SessionJWT>(currentUser ?? EMPTY_USER)
 
     const fileRef = useRef<HTMLInputElement>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -103,7 +98,7 @@ function ManageUserPage() {
         const errorKeys = Object.keys(errs) as Field[]
         if (errorKeys.length > 0) {
             setFieldErrors(errs)
-            
+
             const order: Field[] = [
                 'firstName',
                 'lastName',

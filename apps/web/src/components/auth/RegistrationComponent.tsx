@@ -4,10 +4,8 @@ import { useNavigate } from '@tanstack/react-router'
 import { RegistrationInputSchema } from '@Meowzeum/shared-types'
 import { registerUserMutation } from '#/server/functions/auth/userRegistration'
 import { styles } from '../CommonInterfaces'
-import type { ComponetsFormProps } from '../CommonInterfaces'
+import type { ComponetsFormProps, FieldErrors } from '../CommonInterfaces'
  
-type Field = 'firstName' | 'lastName' | 'email' | 'password' | 'passwordConfirm'
-type FieldErrors = Partial<Record<Field, string>>
  
 function RegistrationComponent({
     visible,
