@@ -1,7 +1,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
-export const Route = createFileRoute('/pages/home')({
+export const Route = createFileRoute('/pages/gallery')({
   component: Home,
 })
 
