@@ -1,4 +1,4 @@
-import { Hono } from 'hono'
+/*import { Hono } from 'hono'
 import { db } from '../db'
 import { createSessionToken, getSessionUserId } from '../authSession'
 
@@ -71,3 +71,4 @@ export function createAuthRouter()
 
   return router
 }
+*/

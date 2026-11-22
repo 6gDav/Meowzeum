@@ -4,11 +4,7 @@ import { setCookie } from "hono/cookie";
 import { sign } from "hono/jwt";
 import { RegistrationInputSchema } from "@Meowzeum/shared-types";
 import { join } from "path";
-
-const turso = createClient({
-    url: process.env.TURSO_DATABASE_URL!,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-});
+import { turso } from '../db'
 
 const JWT_SECRET = process.env.SECRET_JWT!;
 const TOKEN_TTL_SECONDS = 60 * 60 * 24; // 1 day
