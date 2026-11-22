@@ -14,7 +14,7 @@ const DEFAULT_PICTURE = new Uint8Array(
     await Bun.file(avatarPath).arrayBuffer(),
 );
 
-export async function registrateUser(c: Context) {
+export async function registerUser(c: Context) {
     // 1) Validate Schenma
     let body: unknown;
     try {

@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { db } from '../db'
 import { createSessionToken, getSessionUserId } from '../authSession'
-import { registrateUser } from '../auth/registration'
+import { registerUser } from '../auth/registration'
 import internalOnly from '../middlewares/internalOnly'
 
 type UserRow = {
@@ -20,7 +20,7 @@ export function createAuthRouter()
 {
   const router = new Hono()
 
-  router.post('/auth/registration', internalOnly, registrateUser)
+  router.post('/auth/registration', internalOnly, registerUser)
 
   router.post('/auth/login', async (c) => {
     if (!c.req.header('content-type')?.includes('application/json')) {
