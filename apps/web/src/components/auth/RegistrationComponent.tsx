@@ -50,7 +50,7 @@ function RegistrationComponent({
  
         setFieldErrors({})
         mutationRegistration.mutate(parsed.data, {
-            onSuccess: () => navigate({ to: '/' }),
+            onSuccess: () => navigate({ to: '/pages/welcomePage' }),
         })
     };
  
@@ -66,7 +66,7 @@ function RegistrationComponent({
                         <input
                             id="r-first"
                             type="text"
-                            placeholder="Jane"
+                            placeholder="Jhon"
                             autoComplete="given-name"
                             required
                             name="firstName"

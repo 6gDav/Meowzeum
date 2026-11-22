@@ -17,7 +17,7 @@ export default function LoginComponents({
 
     const mutationLogin = useMutation({
         ...loginUserMutation(),
-        onSuccess: () => navigate({ to: '/' }),
+        onSuccess: () => navigate({ to: '/pages/welcomePage' }),
     })
 
     const handleSubmitLogin = (e: React.FormEvent<HTMLFormElement>) => {
