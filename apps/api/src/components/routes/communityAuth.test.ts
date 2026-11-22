@@ -33,4 +33,15 @@ describe('community write authentication', () => {
     expect(response.status).toBe(401)
     expect(db.prepare).not.toHaveBeenCalled()
   })
+
+  it('rejects unauthenticated caption edit requests', async () => {
+    const response = await createCommunityRouter().request('/community/posts/1/caption', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ caption: 'A new caption' }),
+    })
+
+    expect(response.status).toBe(401)
+    expect(db.prepare).not.toHaveBeenCalled()
+  })
 })

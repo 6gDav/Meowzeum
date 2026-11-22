@@ -15,7 +15,7 @@ export const app = new Hono<{ Variables: Variables }>()
 
 app.use('*', cors({
   origin: '*',
-  allowMethods: ['GET'],
+  allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 }))
 app.use('*', logger())
 

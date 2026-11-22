@@ -1,4 +1,4 @@
-import { Hono } from 'hono'
+import { Hono, type Context } from 'hono'
 import { db } from '../db'
 import { getSessionUserId } from '../authSession'
 
@@ -30,10 +30,12 @@ function validImageUrl(value: unknown): value is string
 {
     if (typeof value !== 'string' || value.length > 2048) return false
 
-    try {
+    try
+    {
         return new URL(value).protocol === 'https:'
     }
-    catch {
+    catch
+    {
         return false
     }
 }
@@ -51,7 +53,8 @@ export function createCommunityRouter()
     router.get('/community/posts', async (c) => {
         const sessionUserId = getSessionUserId(c.req.header('cookie'))
         let viewerUserId: number | null = null
-        if (sessionUserId) {
+        if (sessionUserId)
+        {
             const user = await (await db.prepare('SELECT id FROM users WHERE id = ?')).get([sessionUserId])
             if (user) viewerUserId = sessionUserId
         }
@@ -134,53 +137,134 @@ export function createCommunityRouter()
         return c.json({ post: { ...post, likeCount: 0, likedByViewer: false } }, 201)
     })
 
-    // like or unlike post
+    // like or unlike post by id
     router.put('/community/posts/:id/like', async (c) => {
-      if (!c.req.header('content-type')?.includes('application/json')) return c.json({ error: 'Content-Type must be application/json.' }, 415)
+        if (!c.req.header('content-type')?.includes('application/json')) return c.json({ error: 'Content-Type must be application/json.' }, 415)
 
-      let rawBody: unknown
-      try
-      {
-        rawBody = await c.req.json()
-      }
-      catch
-      {
-          return c.json({ error: 'Request body must be valid JSON.' }, 400)
-      }
+        let rawBody: unknown
+        try
+        {
+            rawBody = await c.req.json()
+        }
+        catch
+        {
+            return c.json({ error: 'Request body must be valid JSON.' }, 400)
+        }
 
-      const body = parseJsonBody(rawBody)
-      const liked = body?.liked
-      const postId = c.req.param('id')
+        const body = parseJsonBody(rawBody)
+        const liked = body?.liked
+        const postId = c.req.param('id')
 
-      const sessionUserId = getSessionUserId(c.req.header('cookie'))
-      if (!sessionUserId) return c.json({ error: 'Sign in to like community posts.' }, 401)
-      if (typeof liked !== 'boolean') return c.json({ error: 'A valid like state is required.' }, 400)
+        const sessionUserId = getSessionUserId(c.req.header('cookie'))
+        if (!sessionUserId) return c.json({ error: 'Sign in to like community posts.' }, 401)
+        if (typeof liked !== 'boolean') return c.json({ error: 'A valid like state is required.' }, 400)
 
-      const user = await (await db.prepare('SELECT id FROM users WHERE id = ?')).get([sessionUserId])
-      if (!user) return c.json({ error: 'Sign in to like community posts.' }, 401)
+        const user = await (await db.prepare('SELECT id FROM users WHERE id = ?')).get([sessionUserId])
+        if (!user) return c.json({ error: 'Sign in to like community posts.' }, 401)
 
-      const conn = await db.prepare('SELECT id FROM cat_posts WHERE id = ?',)
-      const postExists = await conn.get([postId])
-      if (!postExists) return c.json({ error: 'Post not found.' }, 404)
+        const conn = await db.prepare('SELECT id FROM cat_posts WHERE id = ?',)
+        const postExists = await conn.get([postId])
+        if (!postExists) return c.json({ error: 'Post not found.' }, 404)
 
-      if (liked)
-      {
-          const conn = await db.prepare(`INSERT INTO cat_post_likes (post_id, visitor_id, created_at)
-              VALUES (?, ?, ?)
-              ON CONFLICT (post_id, visitor_id) DO NOTHING`)
-          await conn.run([postId, sessionUserId, new Date().toISOString()])
-      }
-      else
-      {
-          const conn = await db.prepare('DELETE FROM cat_post_likes WHERE post_id = ? AND visitor_id = ?')
-          await conn.run([postId, sessionUserId])
-      }
-      
-      // get like count for display
-      const conn2 = await db.prepare('SELECT COUNT(*) AS likeCount FROM cat_post_likes WHERE post_id = ?')
-      const likeCount = await conn2.get([postId]) ?? 0
+        if (liked)
+        {
+            const conn = await db.prepare(`INSERT INTO cat_post_likes (post_id, visitor_id, created_at)
+                VALUES (?, ?, ?)
+                ON CONFLICT (post_id, visitor_id) DO NOTHING`)
+            await conn.run([postId, sessionUserId, new Date().toISOString()])
+        }
+        else
+        {
+            const conn = await db.prepare('DELETE FROM cat_post_likes WHERE post_id = ? AND visitor_id = ?')
+            await conn.run([postId, sessionUserId])
+        }
+        
+        // get like count for display
+        const conn2 = await db.prepare('SELECT COUNT(*) AS likeCount FROM cat_post_likes WHERE post_id = ?')
+        const likeCount = await conn2.get([postId]) ?? 0
 
-      return c.json({ liked, likeCount })
+        return c.json({ liked, likeCount })
+    })
+
+    // edit the caption of your own post
+    const editPostCaption = async (c: Context) => {
+        const postId = c.req.param('id')
+        const sessionUserId = getSessionUserId(c.req.header('cookie'))
+        if (!sessionUserId) return c.json({ error: 'Sign in to edit community posts.' }, 401)
+
+        if (!c.req.header('content-type')?.includes('application/json')) return c.json({ error: 'Content-Type must be application/json.' }, 415)
+
+        let rawBody: unknown
+        try
+        {
+            rawBody = await c.req.json()
+        }
+        catch
+        {
+            return c.json({ error: 'Request body must be valid JSON.' }, 400)
+        }
+
+        const body = parseJsonBody(rawBody)
+        if (typeof body?.caption !== 'string') return c.json({ error: 'A valid caption is required.' }, 400)
+
+        const caption = body.caption.trim()
+        if (caption.length > 500) return c.json({ error: 'Caption must be 500 characters or fewer.' }, 400)
+
+        const user = await (await db.prepare('SELECT id FROM users WHERE id = ?')).get([sessionUserId])
+        if (!user) return c.json({ error: 'Sign in to edit community posts.' }, 401)
+
+        const post = await (await db.prepare('SELECT id, author FROM cat_posts WHERE id = ?')).get([postId])
+        if (!post) return c.json({ error: 'Post not found.' }, 404)
+        if (String(post.author) !== String(sessionUserId)) return c.json({ error: 'You can only edit your own posts.' }, 403)
+
+        await (await db.prepare('UPDATE cat_posts SET caption = ? WHERE id = ?')).run([caption, postId])
+
+        return c.json({
+            message: 'Post caption updated successfully.',
+            caption,
+            post: { id: postId, caption },
+        })
+    }
+    router.put('/community/posts/:id/caption', editPostCaption)
+    router.patch('/community/posts/:id/caption', editPostCaption)
+    router.put('/community/posts/:id', editPostCaption)
+    router.patch('/community/posts/:id', editPostCaption)
+
+    // delete own post by id
+    router.delete('/community/posts/:id', async (c) => {
+        if (!c.req.header('content-type')?.includes('application/json')) return c.json({ error: 'Content-Type must be application/json.' }, 415)
+
+        let rawBody: unknown
+        try
+        {
+            rawBody = await c.req.json()
+        }
+        catch
+        {
+            return c.json({ error: 'Request body must be valid JSON.' }, 400)
+        }
+
+        const postId = c.req.param('id')
+
+        const sessionUserId = getSessionUserId(c.req.header('cookie'))
+        if (!sessionUserId) return c.json({ error: 'Sign in to delete community posts.' }, 401)
+        
+
+        const user = await (await db.prepare('SELECT id FROM users WHERE id = ?')).get([sessionUserId])
+        if (!user) return c.json({ error: 'Sign in to delete community posts.' }, 401)
+
+        const posts = await (await db.prepare('SELECT id,author FROM cat_posts WHERE id = ?')).get([postId, sessionUserId])
+
+        // ha a poszt nem létezik
+        if (!posts || !posts.id || !posts.author) return c.json({ error: 'Post not found.' }, 404)
+        
+        // ha az user nem author, hiba
+        if (posts.author !== sessionUserId) return c.json({ error: 'You can only delete your own posts.' }, 403)
+
+        const conn = await db.prepare('DELETE FROM cat_post_likes WHERE post_id = ? AND visitor_id = ?')
+        await conn.run([postId, sessionUserId])
+
+        return c.json({ message: 'Post deleted successfully.' })
     })
 
     return router

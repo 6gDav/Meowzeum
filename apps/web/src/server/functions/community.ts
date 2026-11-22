@@ -31,6 +31,11 @@ type LikeRequest = {
   liked: boolean
 }
 
+type EditCaptionRequest = {
+  postId: number
+  caption: string
+}
+
 type ApiError = {
   error?: string
 }
@@ -78,6 +83,7 @@ const createCommunityPost = createServerFn({ method: 'POST' }).validator((data: 
     })
 })
 
+// idk mér post
 const setCommunityPostLike = createServerFn({ method: 'POST' }).validator((data: LikeRequest) => data).handler(async ({ data }) => {
     return requestApi<{ liked: boolean; likeCount: number }>(`/community/posts/${encodeURIComponent(data.postId)}/like`, {
         method: 'PUT',
@@ -86,4 +92,24 @@ const setCommunityPostLike = createServerFn({ method: 'POST' }).validator((data:
     })
 })
 
-export { createCommunityPost, getCommunityPage, getCommunitySession, setCommunityPostLike }
+// ez is
+const deleteCommunityPost = createServerFn({ method: 'POST' }).validator((data: LikeRequest) => data).handler(async ({ data }) => {
+    return requestApi<{ liked: boolean; likeCount: number }>(`/community/posts/${encodeURIComponent(data.postId)}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+    })
+})
+
+// ez is
+const editCommunityPostCaption = createServerFn({ method: 'POST' }).validator((data: EditCaptionRequest) => data).handler(async ({ data }) => {
+    return requestApi<{ message: string; caption: string; post: { id: number; caption: string } }>(
+        `/community/posts/${encodeURIComponent(data.postId)}/caption`,
+        {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ caption: data.caption }),
+        },
+    )
+})
+
+export { createCommunityPost, editCommunityPostCaption, getCommunityPage, getCommunitySession, setCommunityPostLike, deleteCommunityPost }
