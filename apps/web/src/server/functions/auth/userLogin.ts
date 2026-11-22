@@ -1,9 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseHeader } from '@tanstack/react-start/server'
 import { mutationOptions } from '@tanstack/react-query'
-import { LoginInputSchema, type LoginInput } from '@Meowzeum/shared-types'
+import { /*LoginInputSchema,*/ type LoginInput } from '@Meowzeum/shared-types'
 
-type LoginUser = { id: number; firstName: string; lastName: string; email: string }
+//type LoginUser = { id: number; firstName: string; lastName: string; email: string }
 
 const loginUserFunc = createServerFn({ method: 'POST' })
     .validator((data: LoginInput) => data)
