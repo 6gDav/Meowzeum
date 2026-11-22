@@ -12,7 +12,7 @@ const registerUserFunc = createServerFn({ method: 'POST' })
                 ? 'https://meowzeum-api.onrender.com'
                 : process.env.MEOWZEUM_API_URL ?? 'http://127.0.0.1:3001')
 
-        const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY
+        const INTERNAL_API_KEY = /*process.env.INTERNAL_API_KEY*/"CC0k/x0lwkYzOzDW6I1jKxqDHRmrYwb7T22oTUhiOYV8FG9P641GRzLRN6C6EDQA"
         if (!INTERNAL_API_KEY) {
             throw new Error('INTERNAL_API_KEY is not set')
         }
