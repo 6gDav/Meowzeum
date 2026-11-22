@@ -12,7 +12,29 @@ function AuthButtons({ isMobile = false }: { isMobile?: boolean }) {
     : "hidden md:flex items-center space-x-4";
 
   return user ? (
-    <p>{user.firstName}</p>
+    <Link
+      to="/pages/managgeUser"
+      data-testid="header-profile-button"
+      className="flex items-center gap-2.5 pl-1 pr-3 py-1 rounded-full bg-[#fdf6e2]/70 hover:bg-[#d97706]/15 border border-[#d97706]/30 transition-colors cursor-pointer"
+    >
+      {/* <div className="h-8 w-8 shrink-0 rounded-full overflow-hidden bg-[#fdf6e2] border border-[#d97706]/40 flex items-center justify-center">
+    {avatarUrl ? (
+      <img
+        src={avatarUrl}
+        alt={userName}
+        className="h-full w-full object-cover"
+      />
+    ) : (
+      <span className="font-serif text-xs font-semibold text-[#b45309]">
+        {initials}
+      </span>
+    )}
+  </div> */}
+
+      <span className="text-sm font-semibold text-[#b45309] max-w-[120px] truncate">
+        {user.firstName}
+      </span>
+    </Link>
   ) : (
     <div className={containerClass}>
       <Link
