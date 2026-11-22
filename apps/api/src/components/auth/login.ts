@@ -1,4 +1,3 @@
-import { createClient } from "@libsql/client";
 import type { Context } from "hono";
 import { setCookie } from "hono/cookie";
 import { sign } from "hono/jwt";

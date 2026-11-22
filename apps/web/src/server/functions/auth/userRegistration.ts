@@ -10,7 +10,7 @@ const registerUserFunc = createServerFn({ method: 'POST' })
             process.env.API_URL ??
             (process.env.NODE_ENV === 'production'
                 ? 'https://meowzeum-api.onrender.com'
-                : 'http://localhost:3001')
+                : process.env.MEOWZEUM_API_URL ?? 'http://127.0.0.1:3001')
 
         const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY
         if (!INTERNAL_API_KEY) {
