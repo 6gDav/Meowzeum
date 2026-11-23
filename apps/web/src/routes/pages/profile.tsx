@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { styles, type Field, type FieldErrors } from '#/components/CommonInterfaces'
 import { currentUserQueryOptions } from '#/server/functions/auth/getCurrentUser'
 import type { SessionJWT } from '@Meowzeum/shared-types'
+import { logoutUserMutation } from '#/server/functions/auth/userLogout'
+
 
 export const Route = createFileRoute('/pages/profile')({
     component: ManageUserPage,
@@ -30,6 +32,16 @@ function ManageUserPage() {
     const navigate = useNavigate()
 
     const { data: currentUser } = useSuspenseQuery(currentUserQueryOptions())
+
+    const queryClient = useQueryClient()
+
+    const logout = useMutation({
+        ...logoutUserMutation(),
+        onSettled: () => {
+            queryClient.setQueryData(currentUserQueryOptions().queryKey, null)
+            navigate({ to: '/pages/auth' })
+        },
+    })
 
     const [user, setUser] = useState<SessionJWT>(currentUser ?? EMPTY_USER)
 
@@ -132,8 +144,7 @@ function ManageUserPage() {
     }
 
     const handleLogout = () => {
-        // TODO: call the logout mutation here
-        navigate({ to: '/pages/auth' })
+        logout.mutate()
     }
 
     const handleDelete = () => {
@@ -357,9 +368,10 @@ function ManageUserPage() {
                         id="m-logout"
                         type="button"
                         onClick={handleLogout}
-                        className="w-full py-3 px-4 rounded-xl border border-[#d97706] text-[#b45309] hover:bg-[#d97706]/10 active:scale-[0.99] font-semibold text-sm transition-all duration-200 cursor-pointer"
+                        disabled={logout.isPending}
+                        className="w-full py-3 px-4 rounded-xl border border-[#d97706] text-[#b45309] hover:bg-[#d97706]/10 active:scale-[0.99] font-semibold text-sm transition-all duration-200 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                        Log out
+                        {logout.isPending ? 'Logging out…' : 'Log out'}
                     </button>
 
                     {!confirmingDelete ? (
