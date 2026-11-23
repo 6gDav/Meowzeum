@@ -25,7 +25,7 @@ export async function getMe(c: Context) {
     // 3) Fetch user
     try {
         const result = await turso.execute({
-            sql: `SELECT id, firstName, lastName, email
+            sql: `SELECT id, firstName, lastName, email, picture
                   FROM users WHERE id = ?`,
             args: [userId],
         });
@@ -34,6 +34,11 @@ export async function getMe(c: Context) {
             return c.json({ success: false, error: "User not found" }, 401);
         }
 
+        const pictureBase64 =
+            row.picture instanceof ArrayBuffer
+                ? Buffer.from(row.picture).toString("base64")
+                : null;
+
         return c.json(
             {
                 success: true,
@@ -41,6 +46,7 @@ export async function getMe(c: Context) {
                     firstName: String(row.firstName),
                     lastName: String(row.lastName),
                     email: String(row.email),
+                    picture: pictureBase64,
                 },
             },
             200,

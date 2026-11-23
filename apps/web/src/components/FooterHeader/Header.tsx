@@ -11,25 +11,34 @@ function AuthButtons({ isMobile = false }: { isMobile?: boolean }) {
     ? "pt-4 mt-2 border-t border-[#e5a965]/60 flex flex-col gap-2"
     : "hidden md:flex items-center space-x-4";
 
+  const avatarSrc = user?.avatar
+    ? user.avatar.startsWith("data:")
+      ? user.avatar
+      : `data:image/png;base64,${user.avatar}`
+    : null;
+  console.log("asdasd" + avatarSrc)
+
+  const initials = `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase();
+
   return user ? (
     <Link
       to="/pages/profile"
       data-testid="header-profile-button"
       className="flex items-center gap-2.5 pl-1 pr-3 py-1 rounded-full bg-[#fdf6e2]/70 hover:bg-[#d97706]/15 border border-[#d97706]/30 transition-colors cursor-pointer"
     >
-      {/* <div className="h-8 w-8 shrink-0 rounded-full overflow-hidden bg-[#fdf6e2] border border-[#d97706]/40 flex items-center justify-center">
-    {avatarUrl ? (
-      <img
-        src={avatarUrl}
-        alt={userName}
-        className="h-full w-full object-cover"
-      />
-    ) : (
-      <span className="font-serif text-xs font-semibold text-[#b45309]">
-        {initials}
-      </span>
-    )}
-  </div> */}
+      <div className="h-8 w-8 shrink-0 rounded-full overflow-hidden bg-[#fdf6e2] border border-[#d97706]/40 flex items-center justify-center">
+        {avatarSrc ? (
+          <img
+            src={avatarSrc}
+            alt={user.firstName}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <span className="font-serif text-xs font-semibold text-[#b45309]">
+            {initials}
+          </span>
+        )}
+      </div>
 
       <span className="text-sm font-semibold text-[#b45309] max-w-[120px] truncate">
         {user.firstName}

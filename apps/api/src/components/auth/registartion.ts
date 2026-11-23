@@ -56,6 +56,7 @@ export async function registrateUser(c: Context) {
         firstName,
         lastName,
         email: normalizedEmail,
+        //avatar: 
     };
 
     return createSessionResponse(c, user, 201);

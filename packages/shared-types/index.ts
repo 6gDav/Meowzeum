@@ -20,6 +20,7 @@ export const SessionJWTSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
   email: z.string().email(),
+  avatar: z.string().nullable().optional(),
 });
 
 export type RegistrationInput = z.infer<typeof RegistrationInputSchema>

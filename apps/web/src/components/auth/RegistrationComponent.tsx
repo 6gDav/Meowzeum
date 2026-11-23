@@ -1,30 +1,38 @@
 import React, { useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate, useRouter } from '@tanstack/react-router'
 import { RegistrationInputSchema } from '@Meowzeum/shared-types'
 import { registerUserMutation } from '#/server/functions/auth/userRegistration'
 import { styles } from '../CommonInterfaces'
 import type { ComponetsFormProps, FieldErrors } from '../CommonInterfaces'
- 
- 
+
 function RegistrationComponent({
     visible,
     toggleVisible,
     switchTab,
 }: ComponetsFormProps) {
- 
-    const inputClasses = styles.input;
-    const labelClasses = styles.label;
-    const errorClasses = styles.error;
- 
+    const inputClasses = styles.input
+    const labelClasses = styles.label
+    const errorClasses = styles.error
+
     const navigate = useNavigate()
-    const mutationRegistration = useMutation(registerUserMutation())
+    const router = useRouter()
+    const queryClient = useQueryClient()
+
+    const mutationRegistration = useMutation({
+        ...registerUserMutation(),
+        onSuccess: async () => {
+            queryClient.removeQueries({ queryKey: ['currentUser'] })
+            await router.invalidate()
+            await navigate({ to: '/pages/welcomePage' })
+        },
+    })
     const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
- 
+
     const handleSubmitRegistration = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+        e.preventDefault()
         const form = new FormData(e.currentTarget)
- 
+
         const values = {
             firstName: String(form.get('firstName') ?? ''),
             lastName: String(form.get('lastName') ?? ''),
@@ -32,7 +40,7 @@ function RegistrationComponent({
             password: String(form.get('password') ?? ''),
             passwordConfirm: String(form.get('passwordConfirm') ?? ''),
         }
- 
+
         const parsed = RegistrationInputSchema.safeParse(values)
         if (!parsed.success) {
             const errs = parsed.error.flatten().fieldErrors as Record<string, string[] | undefined>
@@ -45,13 +53,11 @@ function RegistrationComponent({
             })
             return
         }
- 
+
         setFieldErrors({})
-        mutationRegistration.mutate(parsed.data, {
-            onSuccess: () => navigate({ to: '/pages/welcomePage' }),
-        })
-    };
- 
+        mutationRegistration.mutate(parsed.data)
+    }
+
     return (
         <section role="registration" data-testid="registration-form" className="animate-fadeIn">
             <form onSubmit={handleSubmitRegistration} noValidate className="space-y-3.5">
@@ -76,7 +82,7 @@ function RegistrationComponent({
                             {fieldErrors.firstName}
                         </p>
                     </div>
- 
+
                     <div>
                         <label htmlFor="r-last" className={labelClasses}>
                             Last name
@@ -97,7 +103,7 @@ function RegistrationComponent({
                         </p>
                     </div>
                 </div>
- 
+
                 {/* Email Address */}
                 <div>
                     <label htmlFor="r-email" className={labelClasses}>
@@ -118,7 +124,7 @@ function RegistrationComponent({
                         {fieldErrors.email}
                     </p>
                 </div>
- 
+
                 {/* Password */}
                 <div>
                     <label htmlFor="r-pass" className={labelClasses}>
@@ -149,7 +155,7 @@ function RegistrationComponent({
                         {fieldErrors.password}
                     </p>
                 </div>
- 
+
                 {/* Confirm Password */}
                 <div>
                     <label htmlFor="r-confirm" className={labelClasses}>
@@ -180,14 +186,14 @@ function RegistrationComponent({
                         {fieldErrors.passwordConfirm}
                     </p>
                 </div>
- 
+
                 {/* Server error (e.g. "Email already registered") */}
                 {mutationRegistration.isError && (
                     <p id="r-form-err" role="alert" className={errorClasses}>
                         {mutationRegistration.error.message}
                     </p>
                 )}
- 
+
                 {/* Submit */}
                 <button
                     type="submit"
@@ -196,7 +202,7 @@ function RegistrationComponent({
                 >
                     {mutationRegistration.isPending ? 'Creating account…' : 'Registration'}
                 </button>
- 
+
                 <p className="text-center text-sm text-stone-600 pt-2">
                     Already have an account?{' '}
                     <a
@@ -210,6 +216,5 @@ function RegistrationComponent({
         </section>
     )
 }
- 
+
 export default RegistrationComponent
- 

@@ -1,9 +1,6 @@
-import { createClient } from "@libsql/client";
 import type { Context } from "hono";
-import { setCookie } from "hono/cookie";
-import { sign } from "hono/jwt";
 import { LoginInputSchema } from "@Meowzeum/shared-types";
-import { JWT_SECRET, TOKEN_TTL_SECONDS, turso } from "./helper/tursoClient";
+import { turso } from "./helper/tursoClient";
 import { createSessionResponse } from "./helper/setupJWT";
 
 
@@ -33,7 +30,14 @@ export async function loginUser(c: Context) {
     const normalizedEmail = email.trim().toLowerCase();
 
     // 2) Find user
-    let user: { id: number; firstName: string; lastName: string; email: string; password_hash: string } | undefined;
+    let user: {
+        id: number;
+        firstName: string;
+        lastName: string;
+        email: string;
+        password_hash: string
+    } | undefined;
+    
     try {
         const result = await turso.execute({
             sql: `SELECT id, firstName, lastName, email, password_hash
