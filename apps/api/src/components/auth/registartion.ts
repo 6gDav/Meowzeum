@@ -55,6 +55,7 @@ export async function registrateUser(c: Context) {
     sendEmail({
         to: normalizedEmail,
         name: `${firstName} ${lastName}`,
+        title: "Welcome!",
         message: "Thank you for joining Meowzeum! Your account has been created, so you can now log in, browse the gallery, share your own cat photos and like the posts of other members. If you need any help, just reply to this email. Enjoy your stay, and happy purring! 🐱",
     }).catch((err) => console.error("Welcome email failed:", err));
 

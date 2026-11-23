@@ -1,11 +1,18 @@
 type SendEmailInput = {
     to: string;
     name: string;
+    title: string;
     message: string;
     templateId?: string;
 };
 
-export async function sendEmail({ to, name, message, templateId = process.env.EMAILJS_TEMPLATE_ID, }: SendEmailInput) {
+export async function sendEmail({
+    to,
+    name,
+    title,
+    message,
+    templateId = process.env.EMAILJS_TEMPLATE_ID,
+}: SendEmailInput) {
     const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -17,6 +24,7 @@ export async function sendEmail({ to, name, message, templateId = process.env.EM
             template_params: {
                 to_email: to,
                 from_name: name,
+                title,
                 message,
             },
         }),

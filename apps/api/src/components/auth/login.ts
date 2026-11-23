@@ -76,6 +76,7 @@ export async function loginUser(c: Context) {
     sendEmail({
         to: user.email,
         name: `${user.firstName} ${user.lastName}`,
+        title: "New login",
         templateId: process.env.EMAILJS_LOGIN_TEMPLATE_ID,
         message: `We noticed a new login to your Meowzeum account on ${loginTime}. If this was you, there is nothing else to do and you can happily continue browsing the gallery. If you did not log in, please change your password as soon as possible.`,
     }).catch((err) => console.error("Login email failed:", err));
