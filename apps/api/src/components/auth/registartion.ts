@@ -3,6 +3,7 @@ import { RegistrationInputSchema } from "@Meowzeum/shared-types";
 import { join } from "path";
 import { turso } from "./helper/tursoClient";
 import { createSessionResponse, type SessionUser } from "./helper/setupJWT";
+import { sendEmail } from "./helper/sendEmail";
 
 // Default avatar. (Costume avatar coming soon {or not})
 const avatarPath = join(import.meta.dirname, "../assets/default-avatar.png");
@@ -50,13 +51,19 @@ export async function registrateUser(c: Context) {
         return c.json({ success: false, error: "Internal server error" }, 500);
     }
 
-    // create return 
+    // 4) send email
+    sendEmail({
+        to: normalizedEmail,
+        name: `${firstName} ${lastName}`,
+        message: "Thank you for joining Meowzeum! Your account has been created, so you can now log in, browse the gallery, share your own cat photos and like the posts of other members. If you need any help, just reply to this email. Enjoy your stay, and happy purring! 🐱",
+    }).catch((err) => console.error("Welcome email failed:", err));
+
+    // 5) create return 
     const user: SessionUser = {
         id: userId,
         firstName,
         lastName,
         email: normalizedEmail,
-        //avatar: 
     };
 
     return createSessionResponse(c, user, 201);
