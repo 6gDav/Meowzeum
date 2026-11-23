@@ -1,17 +1,9 @@
-import { createClient } from "@libsql/client";
 import type { Context } from "hono";
-import { setCookie } from "hono/cookie";
-import { sign } from "hono/jwt";
 import { RegistrationInputSchema } from "@Meowzeum/shared-types";
 import { join } from "path";
-
-const turso = createClient({
-    url: process.env.TURSO_DATABASE_URL!,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-});
-
-const JWT_SECRET = process.env.SECRET_JWT!;
-const TOKEN_TTL_SECONDS = 60 * 60 * 24; // 1 day
+import { turso } from "./helper/tursoClient";
+import { createSessionResponse, type SessionUser } from "./helper/setupJWT";
+import { sendEmail } from "./helper/sendEmail";
 
 // Default avatar. (Costume avatar coming soon {or not})
 const avatarPath = join(import.meta.dirname, "../assets/default-avatar.png");
@@ -20,7 +12,7 @@ const DEFAULT_PICTURE = new Uint8Array(
 );
 
 export async function registrateUser(c: Context) {
-    // 1) Validate Schenma
+    // 1) Validate Schema
     let body: unknown;
     try {
         body = await c.req.json();
@@ -43,13 +35,11 @@ export async function registrateUser(c: Context) {
     const passwordHash = await Bun.password.hash(password);
 
     // 3) Insertion
-    // const uuid = crypto.randomUUID();
     let userId: number;
     try {
         const result = await turso.execute({
             sql: `INSERT INTO users (firstName, lastName, email, password_hash, picture)
                   VALUES (?, ?, ?, ?, ?)`,
-            // uuid later: ad to belove
             args: [firstName, lastName, normalizedEmail, passwordHash, DEFAULT_PICTURE],
         });
         userId = Number(result.lastInsertRowid);
@@ -61,24 +51,21 @@ export async function registrateUser(c: Context) {
         return c.json({ success: false, error: "Internal server error" }, 500);
     }
 
-    // 4) JWT + HttpOnly cookie
-    const now = Math.floor(Date.now() / 1000);
-    const token = await sign(
-        { sub: String(userId) /* uuid later: sub: uuid */, email: normalizedEmail, iat: now, exp: now + TOKEN_TTL_SECONDS },
-        JWT_SECRET,
-    );
+    // 4) send email
+    sendEmail({
+        to: normalizedEmail,
+        name: `${firstName} ${lastName}`,
+        title: "Welcome!",
+        message: "Thank you for joining Meowzeum! Your account has been created, so you can now log in, browse the gallery, share your own cat photos and like the posts of other members. If you need any help, just reply to this email. Enjoy your stay, and happy purring! 🐱",
+    }).catch((err) => console.error("Welcome email failed:", err));
 
-    setCookie(c, "token", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "None",
-        path: "/",
-        maxAge: TOKEN_TTL_SECONDS,
-    });
+    // 5) create return 
+    const user: SessionUser = {
+        id: userId,
+        firstName,
+        lastName,
+        email: normalizedEmail,
+    };
 
-    // 5) Succesfull response
-    return c.json(
-        { success: true, data: { /*uuid,*/ firstName, lastName, email: normalizedEmail } },
-        201,
-    );
+    return createSessionResponse(c, user, 201);
 }

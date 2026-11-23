@@ -1,13 +1,12 @@
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseHeader } from '@tanstack/react-start/server'
 import { mutationOptions } from '@tanstack/react-query'
-import { LoginInputSchema, type LoginInput } from '@Meowzeum/shared-types'
+import { LoginInputSchema, type LoginInput, type SessionJWT } from '@Meowzeum/shared-types'
 
-type LoginUser = { id: number; firstName: string; lastName: string; email: string }
 
 const loginUserFunc = createServerFn({ method: 'POST' })
     .validator((data: LoginInput) => LoginInputSchema.parse(data))
-    .handler(async ({ data }): Promise<LoginUser> => {
+    .handler(async ({ data }): Promise<SessionJWT> => {
         const API_URL =
             process.env.API_URL ??
             (process.env.NODE_ENV === 'production'

@@ -1,16 +1,9 @@
-import { createClient } from "@libsql/client";
 import type { Context } from "hono";
-import { setCookie } from "hono/cookie";
-import { sign } from "hono/jwt";
 import { LoginInputSchema } from "@Meowzeum/shared-types";
+import { turso } from "./helper/tursoClient";
+import { createSessionResponse } from "./helper/setupJWT";
+import { sendEmail } from "./helper/sendEmail";
 
-const turso = createClient({
-    url: process.env.TURSO_DATABASE_URL!,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-});
-
-const JWT_SECRET = process.env.SECRET_JWT!;
-const TOKEN_TTL_SECONDS = 60 * 60 * 24; // 1 day
 
 //secure dummy hash
 const DUMMY_HASH = await Bun.password.hash("dummy-password-for-timing");
@@ -38,7 +31,14 @@ export async function loginUser(c: Context) {
     const normalizedEmail = email.trim().toLowerCase();
 
     // 2) Find user
-    let user: { id: number; firstName: string; lastName: string; email: string; password_hash: string } | undefined;
+    let user: {
+        id: number;
+        firstName: string;
+        lastName: string;
+        email: string;
+        password_hash: string
+    } | undefined;
+
     try {
         const result = await turso.execute({
             sql: `SELECT id, firstName, lastName, email, password_hash
@@ -66,24 +66,20 @@ export async function loginUser(c: Context) {
         return c.json(INVALID_CREDENTIALS, 401);
     }
 
-    // 4) JWT + HttpOnly cookie
-    const now = Math.floor(Date.now() / 1000);
-    const token = await sign(
-        { sub: String(user.id), email: user.email, iat: now, exp: now + TOKEN_TTL_SECONDS },
-        JWT_SECRET,
-    );
-
-    setCookie(c, "token", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "None",
-        path: "/",
-        maxAge: TOKEN_TTL_SECONDS,
+    // 4) send email
+    const loginTime = new Date().toLocaleString("en-GB", {
+        timeZone: "Europe/Budapest",
+        dateStyle: "medium",
+        timeStyle: "short",
     });
 
-    // 5) Successful response
-    return c.json(
-        { success: true, data: { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email } },
-        200,
-    );
+    sendEmail({
+        to: user.email,
+        name: `${user.firstName} ${user.lastName}`,
+        title: "New login",
+        templateId: process.env.EMAILJS_LOGIN_TEMPLATE_ID,
+        message: `We noticed a new login to your Meowzeum account on ${loginTime}. If this was you, there is nothing else to do and you can happily continue browsing the gallery. If you did not log in, please change your password as soon as possible.`,
+    }).catch((err) => console.error("Login email failed:", err));
+
+    return createSessionResponse(c, user);
 }

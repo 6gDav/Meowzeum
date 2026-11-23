@@ -11,3 +11,6 @@ export interface ComponetsFormProps {
   toggleVisible: (field: PasswordField) => void
   switchTab: (tab: Tab) => void
 }
+
+export type Field = 'firstName' | 'lastName' | 'email' | 'password' | 'passwordConfirm'
+export type FieldErrors = Partial<Record<Field, string>>
