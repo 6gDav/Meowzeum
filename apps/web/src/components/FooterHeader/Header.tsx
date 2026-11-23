@@ -16,7 +16,6 @@ function AuthButtons({ isMobile = false }: { isMobile?: boolean }) {
       ? user.avatar
       : `data:image/png;base64,${user.avatar}`
     : null;
-  console.log("asdasd" + avatarSrc)
 
   const initials = `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase();
 

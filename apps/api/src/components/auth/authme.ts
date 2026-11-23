@@ -46,7 +46,7 @@ export async function getMe(c: Context) {
                     firstName: String(row.firstName),
                     lastName: String(row.lastName),
                     email: String(row.email),
-                    picture: pictureBase64,
+                    avatar: pictureBase64,
                 },
             },
             200,

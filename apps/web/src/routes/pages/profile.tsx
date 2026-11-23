@@ -71,6 +71,12 @@ function ManageUserPage() {
         if (fileRef.current) fileRef.current.value = ''
     }
 
+    const avatarSrc = user?.avatar
+        ? user.avatar.startsWith("data:")
+            ? user.avatar
+            : `data:image/png;base64,${user.avatar}`
+        : null;
+
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setSaved(false)
@@ -160,9 +166,9 @@ function ManageUserPage() {
                             data-testid="manage-user-avatar"
                             className="h-20 w-20 shrink-0 rounded-full overflow-hidden bg-[#fdf6e2] border-2 border-[#d97706]/40 flex items-center justify-center"
                         >
-                            {previewUrl ? (
+                            {avatarSrc ? (
                                 <img
-                                    src={previewUrl}
+                                    src={avatarSrc}
                                     alt="Your profile"
                                     className="h-full w-full object-cover"
                                 />
