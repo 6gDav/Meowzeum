@@ -29,7 +29,7 @@ export const Route = createRootRouteWithContext<{
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'TanStack Start Starter' },
+      { title: 'Meowzeum' },
     ],
     links: [{ rel: 'stylesheet', href: appCss }],
     scripts: [{ children: THEME_INIT_SCRIPT }],
