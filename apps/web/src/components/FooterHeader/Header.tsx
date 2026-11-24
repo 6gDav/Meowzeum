@@ -4,6 +4,8 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
+import CatIcon from "../../assets/cat.ico";
+
 function AuthButtons({ isMobile = false }: { isMobile?: boolean }) {
   const { data: user } = useSuspenseQuery(currentUserQueryOptions());
 
@@ -74,8 +76,8 @@ const Header = () => {
           {/* Brand Logo */}
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-8 h-8 rounded-lg bg-[#d97706] group-hover:bg-[#b45309] transition-colors flex items-center justify-center text-[#fdf6e2] font-bold text-lg">
-                B
+              <div className="w-8 h-8 rounded-lg bg-[#d97706] group-hover:bg-[#b45309] transition-colors flex items-center justify-center overflow-hidden">
+                <img src={CatIcon} alt="Meowzeum logo" className="w-5 h-5 object-contain" />
               </div>
               <span className="font-bold text-xl tracking-tight text-[#b45309]">
                 Meowzeum
