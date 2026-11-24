@@ -14,7 +14,7 @@ function Home() {
         <p className="mb-4 rounded-full border border-[#d97706]/20 bg-white/70 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#b45309]">
           A little corner of the internet for cats
         </p>
-        <h1 className="max-w-3xl font-serif text-4xl font-bold leading-tight tracking-tight text-[#713f12] sm:text-6xl">
+        <h1 className="max-w-4xl font-serif text-5xl font-bold leading-tight tracking-tight text-[#713f12] sm:text-6xl lg:text-7xl">
           Welcome to the
           <span className="text-[#d97706]"> Meowzeum</span>
         </h1>
