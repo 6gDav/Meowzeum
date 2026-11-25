@@ -12,12 +12,8 @@ export interface SessionUser {
     email: string;
 }
 
-export async function createSessionResponse(
-    c: Context,
-    user: SessionUser,
-    status: ContentfulStatusCode = 200,
-) {
-    // 4) JWT + HttpOnly cookie
+export async function createSessionResponse(c: Context, user: SessionUser, status: ContentfulStatusCode = 200) {
+    // 1) JWT + HttpOnly cookie
     const now = Math.floor(Date.now() / 1000);
     const token = await sign(
         { sub: String(user.id), email: user.email, iat: now, exp: now + TOKEN_TTL_SECONDS },
@@ -32,7 +28,7 @@ export async function createSessionResponse(
         maxAge: TOKEN_TTL_SECONDS,
     });
 
-    // 5) Successful response
+    // 2) Successful response
     const returnObject: SessionJWT = {
         firstName: user.firstName,
         lastName: user.lastName,
