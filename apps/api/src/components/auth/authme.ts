@@ -1,28 +1,20 @@
 import type { Context } from "hono";
-import { getCookie } from "hono/cookie";
-import { verify } from "hono/jwt";
-import { JWT_SECRET, turso } from "./helper/tursoClient";
+import { turso } from "./helper/tursoClient";
+import { getSessionUser } from "./helper/getSession";
 
 export async function getMe(c: Context) {
-    // 1) Accept or reject cokkie
-    const token = getCookie(c, "token");
-    if (!token) {
-        return c.json({ success: false, error: "Not authenticated" }, 401);
+    // 1) get user id from cokkie
+    const result = await getSessionUser(c).catch(() =>
+        c.json({ success: false, error: "Internal server error" }, 500)
+    );
+
+    if (typeof result !== "number") {
+        return result;
     }
 
-    // 2) Validate JWT
-    let userId: number;
-    try {
-        const payload = await verify(token, JWT_SECRET, "HS256");
-        userId = Number(payload.sub);
-        if (!Number.isInteger(userId) || userId <= 0) {
-            return c.json({ success: false, error: "Invalid token" }, 401);
-        }
-    } catch {
-        return c.json({ success: false, error: "Invalid or expired token" }, 401);
-    }
+    let userId: number = result;
 
-    // 3) Fetch user
+    // 2) Fetch user
     try {
         const result = await turso.execute({
             sql: `SELECT id, firstName, lastName, email, picture

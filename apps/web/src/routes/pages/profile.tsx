@@ -5,7 +5,8 @@ import { styles, type Field, type FieldErrors } from '#/components/CommonInterfa
 import { currentUserQueryOptions } from '#/server/functions/auth/getCurrentUser'
 import type { SessionJWT } from '@Meowzeum/shared-types'
 import { logoutUserMutation } from '#/server/functions/auth/userLogout'
-
+import { updateProfileMutation } from '#/server/functions/auth/updateProfile'
+import { deleteProfileMutation } from '#/server/functions/auth/deleteAccount'
 
 export const Route = createFileRoute('/pages/profile')({
     component: ManageUserPage,
@@ -34,14 +35,6 @@ function ManageUserPage() {
     const { data: currentUser } = useSuspenseQuery(currentUserQueryOptions())
 
     const queryClient = useQueryClient()
-
-    const logout = useMutation({
-        ...logoutUserMutation(),
-        onSettled: () => {
-            queryClient.setQueryData(currentUserQueryOptions().queryKey, null)
-            navigate({ to: '/pages/auth' })
-        },
-    })
 
     const [user, setUser] = useState<SessionJWT>(currentUser ?? EMPTY_USER)
 
@@ -89,9 +82,14 @@ function ManageUserPage() {
             : `data:image/png;base64,${user.avatar}`
         : null;
 
+    const _queryClientProfileUpdate = useQueryClient()
+    const updateProfile = useMutation(updateProfileMutation())
+    const [_formError, setFormError] = useState<string | null>(null)
+
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setSaved(false)
+        setFormError(null)
         const formEl = e.currentTarget
         const form = new FormData(formEl)
 
@@ -130,26 +128,61 @@ function ManageUserPage() {
         }
 
         setFieldErrors({})
-        // TODO: call the update mutation here, and on success:
-        // queryClient.invalidateQueries({ queryKey: ['currentUser'] })
-        setUser({
-            firstName: values.firstName,
-            lastName: values.lastName,
-            email: values.email,
-        })
-        setShowPass(false)
-        setShowConfirm(false)
-        setFormKey((k) => k + 1)
-        setSaved(true)
+
+        updateProfile.mutate(
+            {
+                firstName: values.firstName,
+                lastName: values.lastName,
+                email: values.email,
+                ...(values.password ? { password: values.password } : {}),
+            },
+            {
+                onSuccess: (updated) => {
+                    queryClient.invalidateQueries({ queryKey: ['currentUser'] })
+                    setUser({
+                        firstName: updated.firstName,
+                        lastName: updated.lastName,
+                        email: updated.email,
+                    })
+                    setShowPass(false)
+                    setShowConfirm(false)
+                    setFormKey((k) => k + 1)
+                    setSaved(true)
+                },
+                onError: (error) => {
+                    setFormError(
+                        error instanceof Error ? error.message : 'Something went wrong',
+                    )
+                },
+            },
+        )
     }
+
+    //Logout
+    const logout = useMutation({
+        ...logoutUserMutation(),
+        onSettled: () => {
+            queryClient.setQueryData(currentUserQueryOptions().queryKey, null)
+            navigate({ to: '/pages/auth' })
+        },
+    })
 
     const handleLogout = () => {
         logout.mutate()
     }
 
+    //Delete
+    const deleteProfile = useMutation({
+        ...deleteProfileMutation(),
+        onSuccess: () => {
+            queryClient.setQueryData(currentUserQueryOptions().queryKey, null)
+            queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== 'currentUser' })
+            navigate({ to: '/' })
+        },
+    })
+
     const handleDelete = () => {
-        // TODO: call the delete mutation here
-        navigate({ to: '/' })
+        deleteProfile.mutate()
     }
 
     return (
@@ -407,10 +440,19 @@ function ManageUserPage() {
                                     id="m-delete-confirm"
                                     type="button"
                                     onClick={handleDelete}
-                                    className="flex-1 py-2.5 px-4 rounded-xl bg-red-700 hover:bg-red-800 text-white font-semibold text-sm transition-colors cursor-pointer"
+                                    disabled={deleteProfile.isPending}
+                                    className="flex-1 py-2.5 px-4 rounded-xl bg-red-700 hover:bg-red-800 text-white font-semibold text-sm transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
-                                    Delete account
+                                    {deleteProfile.isPending ? 'Deleting…' : 'Delete account'}
                                 </button>
+
+                                {deleteProfile.isError && (
+                                    <p role="alert" className="text-sm text-red-800">
+                                        {deleteProfile.error instanceof Error
+                                            ? deleteProfile.error.message
+                                            : 'Could not delete the account'}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     )}
