@@ -27,7 +27,12 @@ const loginUserFunc = createServerFn({ method: 'POST' })
             body: JSON.stringify(data),
         })
 
-        const json = await res.json().catch(() => null)
+        const json = await res.json().catch((err) => {
+            console.error('Error parsing JSON response:', err)
+            throw new Error('Got invalid JSON response from server')
+        })
+
+        //console.log('Server response:', json)
 
         if (!res.ok || !json?.success) {
             throw new Error(json?.error ?? 'Login failed')
