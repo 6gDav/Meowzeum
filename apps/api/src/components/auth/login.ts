@@ -9,8 +9,6 @@ import { emilSendTime } from "./helper/getCurretnTime";
 //secure dummy hash
 const DUMMY_HASH = await Bun.password.hash("dummy-password-for-timing");
 
-const INVALID_CREDENTIALS = { success: false, error: "Invalid email or password" };
-
 export async function loginUser(c: Context) {
     // 1) Validate schema
     let body: unknown;
@@ -64,7 +62,7 @@ export async function loginUser(c: Context) {
     // 3) Argon2 verify 
     const passwordOk = await Bun.password.verify(password, user?.password_hash ?? DUMMY_HASH);
     if (!user || !passwordOk) {
-        return c.json(INVALID_CREDENTIALS, 401);
+        return c.json({ success: false, error: "Invalid email or password" }, 401);
     }
 
     // 4) send email
