@@ -22,7 +22,11 @@ const loginUserFunc = createServerFn({ method: 'POST' })
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
+        }).catch((err) => {
+            console.error('Error during fetch:', err)
+            throw new Error('Failed to connect to the authentication API.')
         })
+        
         const result = await response.json() as {
             token?: string
             user?: { id: number; firstName: string; lastName: string, email: string }
