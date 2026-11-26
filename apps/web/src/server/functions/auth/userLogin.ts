@@ -25,7 +25,7 @@ const loginUserFunc = createServerFn({ method: 'POST' })
         })
         const result = await response.json() as {
             token?: string
-            user?: { id: number; firstName: string; lastName: string, avatar: string, email: string }
+            user?: { id: number; firstName: string; lastName: string, email: string }
             error?: string
         }
 
@@ -39,7 +39,7 @@ const loginUserFunc = createServerFn({ method: 'POST' })
             `meowzeum_session=${result.token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=604800${secureAttribute}`,
         )
 
-        return { firstName: result.user.firstName, lastName: result.user.lastName, email: result.user.email, avatar: result.user.avatar }
+        return { firstName: result.user.firstName, lastName: result.user.lastName, email: result.user.email }
     })
 
 export const loginUserMutation = () =>
