@@ -1,8 +1,7 @@
 import React from 'react'
-import { Link } from '@tanstack/react-router'
-import { styles, type ComponetsFormProps } from './CommonInterfaces'
-import { useMutation } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
+import { styles, type ComponetsFormProps } from '../CommonInterfaces'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate, useRouter } from '@tanstack/react-router'
 import { loginUserMutation } from '#/server/functions/auth/userLogin'
 
 export default function LoginComponents({
@@ -15,10 +14,16 @@ export default function LoginComponents({
     const errorClasses = styles.error
 
     const navigate = useNavigate()
+    const router = useRouter()
+    const queryClient = useQueryClient()
 
     const mutationLogin = useMutation({
         ...loginUserMutation(),
-        onSuccess: () => navigate({ to: '/' }),
+        onSuccess: async (user) => {
+            queryClient.setQueryData(['currentUser'], user)
+            await router.invalidate()
+            await navigate({ to: '/pages/welcomePage' })
+        },
     })
 
     const handleSubmitLogin = (e: React.FormEvent<HTMLFormElement>) => {

@@ -1,11 +1,16 @@
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseHeader } from '@tanstack/react-start/server'
 import { mutationOptions } from '@tanstack/react-query'
-import { RegistrationInputSchema, type RegistrationInput } from '@Meowzeum/shared-types'
+import {
+    RegistrationInputSchema,
+    SessionJWTSchema,
+    type RegistrationInput,
+    type SessionJWT,
+} from '@Meowzeum/shared-types'
 
 const registerUserFunc = createServerFn({ method: 'POST' })
     .validator((data: RegistrationInput) => RegistrationInputSchema.parse(data))
-    .handler(async ({ data }) => {
+    .handler(async ({ data }): Promise<SessionJWT> => {
         const API_URL =
             process.env.API_URL ??
             (process.env.NODE_ENV === 'production'
@@ -27,36 +32,27 @@ const registerUserFunc = createServerFn({ method: 'POST' })
         })
 
         const json = await res.json().catch(() => null)
-        
+
         if (!res.ok) {
             throw new Error(json?.error ?? 'Registration failed')
         }
-        
-        // const text = await res.text()
-        // let json: any = null
-        // try { json = JSON.parse(text) } catch { }
-
-        // if (!res.ok) {
-        //     console.error('API error:', res.status, text)
-        //     throw new Error(json?.error ?? json?.message ?? `Registration failed (${res.status})`)
-        // }
 
         const cookies = res.headers.getSetCookie()
         if (cookies.length > 0) {
             setResponseHeader('Set-Cookie', cookies)
         }
 
-        return { success: true, firstName: json.data.firstName as string }
+        return SessionJWTSchema.parse(json?.data)
     })
 
 export const registerUserMutation = () =>
     mutationOptions({
         mutationFn: (data: RegistrationInput) => registerUserFunc({ data }),
         onSuccess: (responseData, variables) => {
-            console.log('Server response:', responseData.firstName)
+            console.log('Server response:', responseData.firstName, responseData.lastName)
             console.log('Sent email:', variables.email)
         },
         onError: (error, variables) => {
-            console.error('Unsuccesfull registration:', variables.email, error)
-        }
+            console.error('Unsuccessful registration:', variables.email, error)
+        },
     })

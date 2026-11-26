@@ -1,15 +1,24 @@
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseHeader } from '@tanstack/react-start/server'
 import { mutationOptions } from '@tanstack/react-query'
-import { /*LoginInputSchema,*/ type LoginInput } from '@Meowzeum/shared-types'
+import { LoginInputSchema, type LoginInput, type SessionJWT } from '@Meowzeum/shared-types'
 
-//type LoginUser = { id: number; firstName: string; lastName: string; email: string }
 
 const loginUserFunc = createServerFn({ method: 'POST' })
-    .validator((data: LoginInput) => data)
-    .handler(async ({ data }) => {
-        const apiBaseUrl = (process.env.MEOWZEUM_API_URL ?? 'http://127.0.0.1:3001').replace(/\/+$/, '')
-        const response = await fetch(`${apiBaseUrl}/auth/login`, {
+    .validator((data: LoginInput) => LoginInputSchema.parse(data))
+    .handler(async ({ data }): Promise<SessionJWT> => {
+        const API_URL =
+            process.env.API_URL ??
+            (process.env.NODE_ENV === 'production'
+                ? 'https://meowzeum-api.onrender.com'
+                : 'http://localhost:3001')
+
+        const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY
+        if (!INTERNAL_API_KEY) {
+            throw new Error('INTERNAL_API_KEY is not set')
+        }
+
+        const res = await fetch(`${API_URL}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),

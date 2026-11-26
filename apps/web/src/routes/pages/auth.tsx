@@ -15,7 +15,6 @@ function Auth() {
     const location = useLocation()
     const navigate = useNavigate({ from: Route.fullPath })
 
-    // Az aktív tab közvetlenül a hash-ből jön, így külső linkek is működnek
     const activeTab: Tab = location.hash === 'registration' ? 'registration' : 'login'
 
     const [visible, setVisible] = useState<Record<PasswordField, boolean>>({
