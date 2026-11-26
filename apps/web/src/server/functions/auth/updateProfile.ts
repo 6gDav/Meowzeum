@@ -25,7 +25,7 @@ const updateProfileFunc = createServerFn({ method: 'POST' })
 
         const cookie = getRequestHeader('cookie') ?? ''
 
-        const res = await fetch(`${API_URL}/auth/profileChange`, { 
+        const res = await fetch(`${API_URL}/profileChange`, { 
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',

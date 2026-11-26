@@ -20,7 +20,7 @@ const logoutUserFunc = createServerFn({ method: 'POST' }).handler(
         }
 
         try {
-            const res = await fetch(`${API_URL}/auth/logout`, {
+            const res = await fetch(`${API_URL}/logout`, {
                 method: 'POST',
                 headers: {
                     'x-internal-key': INTERNAL_API_KEY,

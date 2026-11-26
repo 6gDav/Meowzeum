@@ -18,7 +18,7 @@ const loginUserFunc = createServerFn({ method: 'POST' })
             throw new Error('INTERNAL_API_KEY is not set')
         }
 
-        const response = await fetch(`${API_URL}/auth/login`, {
+        const response = await fetch(`${API_URL}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),

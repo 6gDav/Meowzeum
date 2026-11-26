@@ -17,7 +17,7 @@ const deleteProfileFunc = createServerFn({ method: 'POST' }).handler(
 
         const cookie = getRequestHeader('cookie') ?? ''
 
-        const res = await fetch(`${API_URL}/auth/profileDelete`, {
+        const res = await fetch(`${API_URL}/profileDelete`, {
             method: 'DELETE',
             headers: {
                 'x-internal-key': INTERNAL_API_KEY,
