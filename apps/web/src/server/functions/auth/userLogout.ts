@@ -14,7 +14,7 @@ const logoutUserFunc = createServerFn({ method: 'POST' }).handler(
                 ? 'https://meowzeum-api.onrender.com'
                 : 'http://localhost:3001')
 
-        const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY
+        const INTERNAL_API_KEY = "CC0k/x0lwkYzOzDW6I1jKxqDHRmrYwb7T22oTUhiOYV8FG9P641GRzLRN6C6EDQA"//process.env.INTERNAL_API_KEY
         if (!INTERNAL_API_KEY) {
             throw new Error('INTERNAL_API_KEY is not set')
         }

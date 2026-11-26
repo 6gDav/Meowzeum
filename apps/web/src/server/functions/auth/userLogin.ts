@@ -13,19 +13,19 @@ const loginUserFunc = createServerFn({ method: 'POST' })
                 ? 'https://meowzeum-api.onrender.com'
                 : 'http://localhost:3001')
 
-        const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY
+        const INTERNAL_API_KEY = "CC0k/x0lwkYzOzDW6I1jKxqDHRmrYwb7T22oTUhiOYV8FG9P641GRzLRN6C6EDQA"//process.env.INTERNAL_API_KEY
         if (!INTERNAL_API_KEY) {
             throw new Error('INTERNAL_API_KEY is not set')
         }
 
-        const res = await fetch(`${API_URL}/auth/login`, {
+        const response = await fetch(`${API_URL}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
         })
         const result = await response.json() as {
             token?: string
-            user?: { id: number; firstName: string; lastName: string }
+            user?: { id: number; firstName: string; lastName: string, avatar: string, email: string }
             error?: string
         }
 
@@ -39,14 +39,14 @@ const loginUserFunc = createServerFn({ method: 'POST' })
             `meowzeum_session=${result.token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=604800${secureAttribute}`,
         )
 
-        return { user: result.user }
+        return { firstName: result.user.firstName, lastName: result.user.lastName, email: result.user.email, avatar: result.user.avatar }
     })
 
 export const loginUserMutation = () =>
     mutationOptions({
         mutationFn: (data: LoginInput) => loginUserFunc({ data }),
         onSuccess: (responseData, variables) => {
-            console.log('Server response:', responseData.user.firstName)
+            console.log('Server response:', responseData.firstName)
             console.log('Sent email:', variables.email)
         },
         onError: (error, variables) => {

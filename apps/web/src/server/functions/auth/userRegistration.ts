@@ -22,7 +22,7 @@ const registerUserFunc = createServerFn({ method: 'POST' })
             throw new Error('INTERNAL_API_KEY is not set')
         }
 
-        const res = await fetch(`${API_URL}/auth/registration`, {
+        const res = await fetch(`${API_URL}/registration`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
