@@ -85,21 +85,27 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/pages/about'
     | '/pages/auth'
+    | '/pages/community'
     | '/pages/gallery'
     | '/pages/profile'
     | '/pages/welcomePage'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/pages/about'
     | '/pages/auth'
+    | '/pages/community'
     | '/pages/gallery'
     | '/pages/profile'
     | '/pages/welcomePage'
   id:
     | '__root__'
     | '/'
+    | '/pages/about'
     | '/pages/auth'
+    | '/pages/community'
     | '/pages/gallery'
     | '/pages/profile'
     | '/pages/welcomePage'
