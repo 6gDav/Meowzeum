@@ -76,7 +76,19 @@ describe('Registration logic', () => {
 
         const res = await callRegister(validUser)
 
-        expect(res).toEqual({ success: true, firstName: 'Jane' })
+        expect(res).toEqual(apiUser)
+    })
+
+    it('Throws if the backend sends a wrong user data', async () => {
+        mockFetch.mockResolvedValue(apiResponse({ success: true, data: { firstName: 'Jane' } }))
+
+        await expect(callRegister(validUser)).rejects.toThrow()
+    })
+
+    it('Throws if the backend sends no user data', async () => {
+        mockFetch.mockResolvedValue(apiResponse({ success: true }))
+
+        await expect(callRegister(validUser)).rejects.toThrow()
     })
 
     it('Does not return the passwords', async () => {
@@ -164,9 +176,10 @@ describe('Registration mutation callbacks', () => {
         const log = vi.spyOn(console, 'log').mockImplementation(() => { })
         const mutation = registerUserMutation() as any
 
-        mutation.onSuccess({ success: true, firstName: validUser.firstName }, validUser)
+        mutation.onSuccess(apiUser, validUser)
 
-        expect(log).toHaveBeenCalledWith('Server response:', validUser.firstName)
+        expect(log).toHaveBeenCalledWith('Server response:', 'Jane', 'Doe')
+        expect(log).toHaveBeenCalledWith('Sent email:', validUser.email)
         log.mockRestore()
     })
 
@@ -177,7 +190,7 @@ describe('Registration mutation callbacks', () => {
 
         mutation.onError(err, validUser)
 
-        expect(error).toHaveBeenCalledWith('Unsuccesfull registration:', validUser.email, err)
+        expect(error).toHaveBeenCalledWith('Unsuccessful registration:', validUser.email, err)
         error.mockRestore()
     })
 })

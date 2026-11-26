@@ -6,7 +6,7 @@ async function getCatPictures2(): Promise<string[]> {
     console.log(`Cat images from ${BACKEND_NAME}.`);
 
     const catImageList: string[] = [];
-    const apiKey = Bun.env.CAT_API_KEY; 
+    const apiKey = process.env.CAT_API_KEY; 
     
     try {
         const response = await fetch(API_URL, {

@@ -17,7 +17,7 @@ const isAllowedOrigin = (origin: string): boolean =>
 export const authCors = cors({
   origin: (origin) => (isAllowedOrigin(origin) ? origin : null),
   credentials: true,
-  allowMethods: ["POST", "GET", "POST", "PUT", "DELETE"], 
+  allowMethods: ["GET", "POST", "PATCH", "DELETE"],
   allowHeaders: ["Content-Type"],
   maxAge: 86400,
 });

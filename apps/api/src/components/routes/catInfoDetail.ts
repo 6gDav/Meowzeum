@@ -11,7 +11,7 @@ catInfoDetailRouter.get('/get-a-cat-info-datail/get-all-names/', limiter(3), asy
 });
 
 catInfoDetailRouter.get('/get-a-cat-info-datail/get-all-properties/', limiter(3), async (c) => {
-  const catNames = Object.keys(catDatabase[0]);
+  const catNames = Object.keys(catDatabase[0]!);
 
   return c.json(catNames);
 });
@@ -23,7 +23,7 @@ catInfoDetailRouter.get('/get-a-cat-info-datail/:name/:datail', limiter(3), asyn
   const catInfo = catDatabase.find((cat) => cat.name === catName);
   const catInfoDetail = catInfo?.[catDetail as keyof typeof catInfo];
 
-  if (!catInfo || !(catDetail in catInfo)) {
+  if (!catInfo || !Object.hasOwn(catInfo, catDetail)) {
     return c.json(
       {
         success: false,
@@ -33,7 +33,7 @@ catInfoDetailRouter.get('/get-a-cat-info-datail/:name/:datail', limiter(3), asyn
     );
   }
 
-  return c.json(catInfo[catDetail as keyof typeof catInfo]);
+  return c.json(catInfoDetail!);
 });
 
 export default catInfoDetailRouter;

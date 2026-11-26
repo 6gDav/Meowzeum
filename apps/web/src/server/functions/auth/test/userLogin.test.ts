@@ -141,6 +141,7 @@ describe('Login mutation callbacks', () => {
         mutation.onSuccess(apiUser, validLogin)
 
         expect(log).toHaveBeenCalledWith('Server response:', 'Jane')
+        expect(log).toHaveBeenCalledWith('Sent email:', validLogin.email)
         log.mockRestore()
     })
 
