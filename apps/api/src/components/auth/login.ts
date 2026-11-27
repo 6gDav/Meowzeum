@@ -59,6 +59,11 @@ export async function loginUser(c: Context) {
         return c.json({ success: false, error: "Internal server error: "+err }, 500);
     }
 
+    if (!user)
+    {
+        console.error("user is not found");
+    }
+
     // 3) Argon2 verify 
     const passwordOk = await Bun.password.verify(password, user?.password_hash ?? DUMMY_HASH);
     if (!user || !passwordOk) {
