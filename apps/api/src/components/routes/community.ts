@@ -1,6 +1,6 @@
 import { Hono, type Context } from 'hono'
-import { db } from '../db'
 import { getSessionUserId } from '../authSession'
+import { turso } from '../auth/helper/tursoClient.ts'
 
 /*type PostRow = {
     id: string
@@ -55,8 +55,14 @@ export function createCommunityRouter()
         let viewerUserId: number | null = null
         if (sessionUserId)
         {
-            const user = await (await db.prepare('SELECT id FROM users WHERE id = ?')).get([sessionUserId])
-            if (user) viewerUserId = sessionUserId
+            const result = await turso.execute({
+                sql: `SELECT id FROM users WHERE id = ?`,
+                args: [sessionUserId],
+            })
+
+            const row = result.rows[0]
+            
+            if (row) viewerUserId = sessionUserId
         }
         const cursor = c.req.query('cursor')
         const requestedLimit = Number(c.req.query('limit') ?? 8)
@@ -67,16 +73,19 @@ export function createCommunityRouter()
         }
 
         const limit = Number.isInteger(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 20) : 8
-        const conn = await db.prepare(`${postQuery}
-            WHERE (? IS NULL OR p.created_at < (
-                SELECT created_at FROM cat_posts WHERE id = ?
-            ) OR (p.created_at = (
-                SELECT created_at FROM cat_posts WHERE id = ?
-            ) AND p.id < ?))
-            GROUP BY p.id
-            ORDER BY p.created_at DESC, p.id DESC
-            LIMIT ?`)
-        const rows = await conn.all([viewerUserId, cursor ?? null, cursor ?? null, cursor ?? null, cursor ?? null, limit + 1])
+        const result = await turso.execute({
+            sql: `${postQuery}
+                WHERE (? IS NULL OR p.created_at < (
+                    SELECT created_at FROM cat_posts WHERE id = ?
+                ) OR (p.created_at = (
+                    SELECT created_at FROM cat_posts WHERE id = ?
+                ) AND p.id < ?))
+                GROUP BY p.id
+                ORDER BY p.created_at DESC, p.id DESC
+                LIMIT ?`,
+            args: [viewerUserId, cursor ?? null, cursor ?? null, cursor ?? null, cursor ?? null, limit + 1],
+        });
+        const rows = await result.rows
 
         const hasMore = rows.length > limit
         const posts = rows.slice(0, limit).map((post) => ({
@@ -95,7 +104,11 @@ export function createCommunityRouter()
         const sessionUserId = getSessionUserId(c.req.header('cookie'))
         if (!sessionUserId) return c.json({ error: 'Sign in to create community posts.' }, 401)
 
-        const user = await (await db.prepare('SELECT id FROM users WHERE id = ?')).get([sessionUserId])
+        const result = await turso.execute({
+            sql: `SELECT id FROM users WHERE id = ?`,
+            args: [sessionUserId],
+        });
+        const user = result.rows[0];
         if (!user) return c.json({ error: 'Sign in to create community posts.' }, 401)
 
         if (!c.req.header('content-type')?.includes('application/json'))
@@ -131,8 +144,10 @@ export function createCommunityRouter()
         }
         
         // execute
-        const conn3 = await db.prepare(`INSERT INTO cat_posts (author, image_url, caption, created_at) VALUES (?, ?, ?, ?)`)
-        await conn3.run([post.author, post.imageUrl, post.caption, post.createdAt])
+        await turso.execute({
+            sql: `INSERT INTO cat_posts (author, image_url, caption, created_at) VALUES (?, ?, ?, ?)`,
+            args: [post.author, post.imageUrl, post.caption, post.createdAt],
+        });
 
         return c.json({ post: { ...post, likeCount: 0, likedByViewer: false } }, 201)
     })
@@ -159,29 +174,43 @@ export function createCommunityRouter()
         if (!sessionUserId) return c.json({ error: 'Sign in to like community posts.' }, 401)
         if (typeof liked !== 'boolean') return c.json({ error: 'A valid like state is required.' }, 400)
 
-        const user = await (await db.prepare('SELECT id FROM users WHERE id = ?')).get([sessionUserId])
+        const user_result = await turso.execute({
+            sql: `SELECT id FROM users WHERE id = ?`,
+            args: [sessionUserId],
+        })
+        const user = await user_result.rows[0]
         if (!user) return c.json({ error: 'Sign in to like community posts.' }, 401)
 
-        const conn = await db.prepare('SELECT id FROM cat_posts WHERE id = ?',)
-        const postExists = await conn.get([postId])
-        if (!postExists) return c.json({ error: 'Post not found.' }, 404)
+        const result = await turso.execute({
+            sql: `SELECT id FROM cat_posts WHERE id = ?`,
+            args: [postId],
+        });
+        const post = result.rows[0]
+        if (!post) return c.json({ error: 'Post not found.' }, 404)
 
         if (liked)
         {
-            const conn = await db.prepare(`INSERT INTO cat_post_likes (post_id, visitor_id, created_at)
+            await turso.execute({
+                sql: `INSERT INTO cat_post_likes (post_id, visitor_id, created_at)
                 VALUES (?, ?, ?)
-                ON CONFLICT (post_id, visitor_id) DO NOTHING`)
-            await conn.run([postId, sessionUserId, new Date().toISOString()])
+                ON CONFLICT (post_id, visitor_id) DO NOTHING`,
+                args: [postId, sessionUserId, new Date().toISOString()],
+            });
         }
         else
         {
-            const conn = await db.prepare('DELETE FROM cat_post_likes WHERE post_id = ? AND visitor_id = ?')
-            await conn.run([postId, sessionUserId])
+            await turso.execute({
+                sql: `DELETE FROM cat_post_likes WHERE post_id = ? AND visitor_id = ?`,
+                args: [postId, sessionUserId],
+            });
         }
         
         // get like count for display
-        const conn2 = await db.prepare('SELECT COUNT(*) AS likeCount FROM cat_post_likes WHERE post_id = ?')
-        const likeCount = await conn2.get([postId]) ?? 0
+        const like_result = await turso.execute({
+            sql: `SELECT COUNT(*) AS likeCount FROM cat_post_likes WHERE post_id = ?`,
+            args: [postId],
+        });
+        const likeCount = like_result.rows[0] ?? 0
 
         return c.json({ liked, likeCount })
     })
@@ -210,14 +239,25 @@ export function createCommunityRouter()
         const caption = body.caption.trim()
         if (caption.length > 500) return c.json({ error: 'Caption must be 500 characters or fewer.' }, 400)
 
-        const user = await (await db.prepare('SELECT id FROM users WHERE id = ?')).get([sessionUserId])
+        const user_result = await turso.execute({
+            sql: `SELECT id FROM users WHERE id = ?`,
+            args: [sessionUserId],
+        })
+        const user = await user_result.rows[0]
         if (!user) return c.json({ error: 'Sign in to edit community posts.' }, 401)
 
-        const post = await (await db.prepare('SELECT id, author FROM cat_posts WHERE id = ?')).get([postId])
+        const post_result = await turso.execute({
+            sql: `SELECT id,author FROM cat_posts WHERE id = ?`,
+            args: [postId],
+        })
+        const post = await post_result.rows[0];
         if (!post) return c.json({ error: 'Post not found.' }, 404)
         if (String(post.author) !== String(sessionUserId)) return c.json({ error: 'You can only edit your own posts.' }, 403)
 
-        await (await db.prepare('UPDATE cat_posts SET caption = ? WHERE id = ?')).run([caption, postId])
+        await turso.execute({
+            sql: `UPDATE cat_posts SET caption = ? WHERE id = ?`,
+            args: [caption, postId],
+        })
 
         return c.json({
             message: 'Post caption updated successfully.',
@@ -249,11 +289,18 @@ export function createCommunityRouter()
         const sessionUserId = getSessionUserId(c.req.header('cookie'))
         if (!sessionUserId) return c.json({ error: 'Sign in to delete community posts.' }, 401)
         
-
-        const user = await (await db.prepare('SELECT id FROM users WHERE id = ?')).get([sessionUserId])
+        const user_result = await turso.execute({
+            sql: `SELECT id FROM users WHERE id = ?`,
+            args: [sessionUserId],
+        })
+        const user = await user_result.rows[0]
         if (!user) return c.json({ error: 'Sign in to delete community posts.' }, 401)
 
-        const posts = await (await db.prepare('SELECT id,author FROM cat_posts WHERE id = ?')).get([postId, sessionUserId])
+        const posts_result = await turso.execute({
+            sql: `SELECT id,author FROM cat_posts WHERE id = ?`,
+            args: [postId, sessionUserId],
+        })
+        const posts = await posts_result.rows; 
 
         // ha a poszt nem létezik
         if (!posts || !posts.id || !posts.author) return c.json({ error: 'Post not found.' }, 404)
@@ -261,8 +308,10 @@ export function createCommunityRouter()
         // ha az user nem author, hiba
         if (posts.author !== sessionUserId) return c.json({ error: 'You can only delete your own posts.' }, 403)
 
-        const conn = await db.prepare('DELETE FROM cat_post_likes WHERE post_id = ? AND visitor_id = ?')
-        await conn.run([postId, sessionUserId])
+        await turso.execute({
+            sql: `DELETE FROM cat_post_likes WHERE post_id = ? AND visitor_id = ?`,
+            args: [postId, sessionUserId],
+        })
 
         return c.json({ message: 'Post deleted successfully.' })
     })
