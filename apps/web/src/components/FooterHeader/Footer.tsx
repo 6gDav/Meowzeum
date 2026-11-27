@@ -16,11 +16,11 @@ export default function Footer() {
                 />
                 <a
                     className={`${linkClass} font-medium`}
-                    href="https://github.com/6gDav"
+                    href="https://github.com/6gDav/Meowzeum"
                     target="_blank"
                     rel="noreferrer"
                 >
-                    Meowzeum team
+                    Meowzeum on Github
                 </a>
             </aside>
 
