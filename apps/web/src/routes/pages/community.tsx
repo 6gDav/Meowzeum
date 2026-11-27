@@ -14,19 +14,12 @@ export const Route = createFileRoute('/pages/community')({
   component: Community,
 })
 
-const displayNameStorageKey = 'meowzeum-community-display-name'
-
 function Community() {
   const queryClient = useQueryClient()
-  const [displayName, setDisplayName] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [caption, setCaption] = useState('')
   const [formError, setFormError] = useState('')
   const loadMoreRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    setDisplayName(localStorage.getItem(displayNameStorageKey) ?? '')
-  }, [])
 
   const sessionQuery = useQuery({
     queryKey: ['community-session'],
@@ -99,11 +92,6 @@ function Community() {
       return
     }
 
-    const author = displayName.trim()
-    if (!author || author.length > 40) {
-      setFormError('Choose a display name between 1 and 40 characters.')
-      return
-    }
     if (caption.trim().length > 500) {
       setFormError('Keep your caption to 500 characters or fewer.')
       return
@@ -119,9 +107,8 @@ function Community() {
       return
     }
 
-    localStorage.setItem(displayNameStorageKey, author)
     postMutation.mutate({
-      data: { author, imageUrl: imageUrl.trim(), caption: caption.trim() },
+      data: { imageUrl: imageUrl.trim(), caption: caption.trim() },
     })
   }
 
@@ -180,7 +167,16 @@ function Community() {
             {posts.map((post) => (
               <article key={post.id} className="overflow-hidden rounded-3xl border border-[#d97706]/15 bg-white shadow-sm shadow-[#713f12]/5">
                 <div className="flex items-center gap-3 px-5 py-4">
-                  <span className="grid size-10 place-items-center rounded-full bg-[#f7e8c7] text-lg" aria-hidden="true">🐾</span>
+                  {post.avatar ? (
+                    <img
+                      src={post.avatar.startsWith('data:') ? post.avatar : `data:image/png;base64,${post.avatar}`}
+                      alt=""
+                      loading="lazy"
+                      className="size-10 rounded-full bg-[#f7e8c7] object-cover"
+                    />
+                  ) : (
+                    <span className="grid size-10 place-items-center rounded-full bg-[#f7e8c7] text-lg" aria-hidden="true">🐾</span>
+                  )}
                   <div className="min-w-0">
                     <p className="truncate text-sm font-extrabold text-[#713f12]">{post.author}</p>
                     <time className="text-xs text-stone-500" dateTime={post.createdAt}>
@@ -254,17 +250,6 @@ function Community() {
               </p>
             ) : (
             <form onSubmit={submitPost} className="mt-5 space-y-4">
-              <label className="block text-sm font-bold text-stone-700">
-                Your display name
-                <input
-                  value={displayName}
-                  onChange={(event) => setDisplayName(event.target.value)}
-                  maxLength={40}
-                  required
-                  className="mt-1.5 w-full rounded-xl border border-stone-200 bg-[#fffdf8] px-3 py-2.5 font-normal outline-none transition focus:border-[#d97706] focus:ring-2 focus:ring-[#d97706]/15"
-                  placeholder="Cat person"
-                />
-              </label>
               <label className="block text-sm font-bold text-stone-700">
                 Photo URL
                 <input

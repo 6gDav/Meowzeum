@@ -4,6 +4,7 @@ import { getRequestHeader } from '@tanstack/react-start/server'
 export type CommunityPost = {
   id: number
   author: string
+  avatar: string | null
   imageUrl: string
   caption: string
   createdAt: string
@@ -21,7 +22,6 @@ type FeedRequest = {
 }
 
 type CreatePostRequest = {
-  author: string
   imageUrl: string
   caption: string
 }
@@ -47,6 +47,7 @@ type CommunityUser = {
 
 type ApiCommunityPost = Pick<CommunityPost, 'id' | 'imageUrl' | 'caption' | 'createdAt'> & {
   author?: string
+  avatar?: string | null
   author_id?: string | number
   likeCount?: number
   likedByViewer?: boolean
@@ -106,6 +107,7 @@ const getCommunityPage = createServerFn({ method: 'GET' }).validator((data: Feed
     posts: result.posts.map((post) => ({
       id: post.id,
       author: post.author ?? String(post.author_id ?? ''),
+      avatar: post.avatar ?? null,
       imageUrl: post.imageUrl,
       caption: post.caption,
       createdAt: post.createdAt,
@@ -121,7 +123,6 @@ const createCommunityPost = createServerFn({ method: 'POST' }).validator((data: 
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      author_id: data.author,
       imageUrl: data.imageUrl,
       caption: data.caption,
     }),
@@ -129,7 +130,8 @@ const createCommunityPost = createServerFn({ method: 'POST' }).validator((data: 
   return {
     post: {
       id: result.post.id,
-      author: result.post.author ?? String(result.post.author_id ?? data.author),
+      author: result.post.author ?? '',
+      avatar: result.post.avatar ?? null,
       imageUrl: result.post.imageUrl,
       caption: result.post.caption,
       createdAt: result.post.createdAt,

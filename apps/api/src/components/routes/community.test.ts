@@ -23,7 +23,9 @@ describe('community routes', () => {
 
   it('rejects non-HTTPS image URLs', async () => {
     mockExecute.mockImplementation(async ({ sql }: { sql: string }) => {
-      if (sql.startsWith('SELECT id FROM users')) return { rows: [{ id: 42 }] }
+      if (sql.startsWith('SELECT id, firstName, lastName, picture FROM users')) {
+        return { rows: [{ id: 42, firstName: 'Milo', lastName: 'Cat', picture: new Uint8Array([1, 2, 3]) }] }
+      }
       return { rows: [], lastInsertRowid: 1n }
     })
 
@@ -52,7 +54,9 @@ describe('community routes', () => {
 
   it('creates a post through the Turso client', async () => {
     mockExecute.mockImplementation(async ({ sql }: { sql: string }) => {
-      if (sql.startsWith('SELECT id FROM users')) return { rows: [{ id: 42 }] }
+      if (sql.startsWith('SELECT id, firstName, lastName, picture FROM users')) {
+        return { rows: [{ id: 42, firstName: 'Milo', lastName: 'Cat', picture: new Uint8Array([1, 2, 3]) }] }
+      }
       if (sql.startsWith('INSERT INTO cat_posts')) return { rows: [], lastInsertRowid: 7n }
       return { rows: [] }
     })
@@ -61,7 +65,6 @@ describe('community routes', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        author_id: 'Milo',
         imageUrl: 'https://images.example.com/cat.jpg',
         caption: 'A cozy nap',
       }),
@@ -69,8 +72,12 @@ describe('community routes', () => {
 
     expect(response.status).toBe(201)
     expect(await response.json()).toMatchObject({
-      post: { id: 7, author: 'Milo', likeCount: 0, likedByViewer: false },
+      post: { id: 7, author: 'Milo Cat', avatar: 'AQID', likeCount: 0, likedByViewer: false },
     })
+    expect(mockExecute).toHaveBeenCalledWith(expect.objectContaining({
+      sql: expect.stringContaining('INSERT INTO cat_posts'),
+      args: [42, 'https://images.example.com/cat.jpg', 'A cozy nap', expect.any(String)],
+    }))
   })
 
   it('allows an anonymous viewer to load the feed', async () => {
@@ -87,7 +94,10 @@ describe('community routes', () => {
     mockExecute.mockResolvedValue({
       rows: [{
         id: 3,
-        author_id: 'Milo',
+        author_id: 42,
+        firstName: 'Milo',
+        lastName: 'Cat',
+        avatar: new Uint8Array([1, 2, 3]),
         imageUrl: 'https://images.example.com/cat.jpg',
         caption: 'A cozy nap',
         createdAt: '2026-01-01T00:00:00.000Z',
@@ -101,7 +111,8 @@ describe('community routes', () => {
     expect(await response.json()).toMatchObject({
       posts: [{
         id: 3,
-        author: 'Milo',
+        author: 'Milo Cat',
+        avatar: 'AQID',
         likeCount: 2,
         likedByViewer: true,
       }],

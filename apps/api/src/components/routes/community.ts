@@ -1,6 +1,7 @@
 import { Hono, type Context } from 'hono'
 import { getSessionUser } from '../auth/helper/getSession'
 import { turso } from '../auth/helper/tursoClient.ts'
+import { use } from 'hono/jsx'
 
 /*type PostRow = {
     id: string
@@ -13,13 +14,24 @@ import { turso } from '../auth/helper/tursoClient.ts'
 const postQuery = `SELECT
     p.id,
     p.author_id,
+    u.firstName,
+    u.lastName,
+    u.picture AS avatar,
     p.image_url AS imageUrl,
     p.caption,
     p.created_at AS createdAt,
     COUNT(l.visitor_id) AS likeCount,
     COALESCE(MAX(CASE WHEN l.visitor_id = ? THEN 1 ELSE 0 END), 0) AS likedByViewer
 FROM cat_posts p
+JOIN users u ON u.id = p.author_id
 LEFT JOIN cat_post_likes l ON l.post_id = p.id`
+
+function pictureToBase64(value: unknown): string | null
+{
+    if (value instanceof ArrayBuffer) return Buffer.from(value).toString('base64')
+    if (value instanceof Uint8Array) return Buffer.from(value).toString('base64')
+    return null
+}
 
 function isRecord(value: unknown): value is Record<string, unknown>
 {
@@ -52,7 +64,7 @@ export function createCommunityRouter()
     // get posts with optional cursor and limit query parameters
     router.get('/community/posts', async (c) => {
         const sessionResult = await getSessionUser(c)
-        const viewerUserId = typeof sessionResult === 'number' ? sessionResult : null
+        const userId = typeof sessionResult === 'number' ? sessionResult : null
         const cursor = c.req.query('cursor')
         const requestedLimit = Number(c.req.query('limit') ?? 8)
 
@@ -72,7 +84,7 @@ export function createCommunityRouter()
                 GROUP BY p.id
                 ORDER BY p.created_at DESC, p.id DESC
                 LIMIT ?`,
-            args: [viewerUserId, cursor ?? null, cursor ?? null, cursor ?? null, cursor ?? null, limit + 1],
+            args: [userId, cursor ?? null, cursor ?? null, cursor ?? null, cursor ?? null, limit + 1],
         });
         const rows = result.rows
 
@@ -81,7 +93,8 @@ export function createCommunityRouter()
             const id = Number(post.id)
             return {
                 id,
-                author: String(post.author_id),
+                author: `${String(post.firstName)} ${String(post.lastName)}`,
+                avatar: pictureToBase64(post.avatar),
                 imageUrl: String(post.imageUrl),
                 caption: String(post.caption ?? ''),
                 createdAt: String(post.createdAt),
@@ -98,13 +111,8 @@ export function createCommunityRouter()
     
     // create new post
     router.post('/community/posts', async (c) => {
-        const session_result = await getSessionUser(c).catch(() =>
-        c.json({ success: false, error: "Internal server error" }, 500)
-        );
-        if (typeof session_result !== "number") {
-            return session_result;
-        }
-        let userId: number = session_result;
+        const sessionResult = await getSessionUser(c)
+        const userId = typeof sessionResult === 'number' ? sessionResult : null
 
         if (!userId) return c.json({ error: 'Sign in to create community posts.' }, 401)
 
@@ -114,7 +122,7 @@ export function createCommunityRouter()
         }
 
         const result = await turso.execute({
-            sql: `SELECT id FROM users WHERE id = ?`,
+            sql: `SELECT id, firstName, lastName, picture FROM users WHERE id = ?`,
             args: [userId],
         });
         const user = result.rows[0];
@@ -131,17 +139,16 @@ export function createCommunityRouter()
         }
 
         const body = parseJsonBody(rawBody)
-        const author_id = typeof body?.author_id === 'string' ? body.author_id.trim() : ''
         const caption = typeof body?.caption === 'string' ? body.caption.trim() : ''
         const imageUrl = body?.imageUrl
         
         // parameter validation
-        if (!author_id || author_id.length > 40) return c.json({ error: 'Author_id must be between 1 and 40 characters.' }, 400)
         if (!validImageUrl(imageUrl)) return c.json({ error: 'Please provide a valid HTTPS image URL.' }, 400)
         if (caption.length > 500) return c.json({ error: 'Caption must be 500 characters or fewer.' }, 400)
 
         const post = {
-          author_id,
+          author: `${String(user.firstName)} ${String(user.lastName)}`,
+          avatar: pictureToBase64(user.picture),
           imageUrl,
           caption,
           createdAt: new Date().toISOString(),
@@ -150,7 +157,7 @@ export function createCommunityRouter()
         // execute
         const insertResult = await turso.execute({
             sql: `INSERT INTO cat_posts (author_id, image_url, caption, created_at) VALUES (?, ?, ?, ?)`,
-            args: [post.author_id, post.imageUrl, post.caption, post.createdAt],
+            args: [userId, post.imageUrl, post.caption, post.createdAt],
         });
 
         const id = typeof insertResult.lastInsertRowid === 'bigint'
@@ -160,7 +167,8 @@ export function createCommunityRouter()
         return c.json({
             post: {
                 id,
-                author: post.author_id,
+                author: post.author,
+                avatar: post.avatar,
                 imageUrl: post.imageUrl,
                 caption: post.caption,
                 createdAt: post.createdAt,
@@ -188,13 +196,8 @@ export function createCommunityRouter()
         const liked = body?.liked
         const postId = c.req.param('id')
 
-        const session_result = await getSessionUser(c).catch(() =>
-            c.json({ success: false, error: "Internal server error" }, 500)
-        );
-        if (typeof session_result !== "number") {
-            return session_result;
-        }
-        let userId: number = session_result;
+        const sessionResult = await getSessionUser(c)
+        const userId = typeof sessionResult === 'number' ? sessionResult : null
 
         if (!userId) return c.json({ error: 'Sign in to like community posts.' }, 401)
         if (typeof liked !== 'boolean') return c.json({ error: 'A valid like state is required.' }, 400)
@@ -244,13 +247,8 @@ export function createCommunityRouter()
     const editPostCaption = async (c: Context) => {
         const postId = c.req.param('id')
 
-        const session_result = await getSessionUser(c).catch(() =>
-            c.json({ success: false, error: "Internal server error" }, 500)
-        );
-        if (typeof session_result !== "number") {
-            return session_result;
-        }
-        let userId: number = session_result;
+        const sessionResult = await getSessionUser(c)
+        const userId = typeof sessionResult === 'number' ? sessionResult : null
 
         if (!userId) return c.json({ error: 'Sign in to edit community posts.' }, 401)
 
@@ -310,13 +308,8 @@ export function createCommunityRouter()
         const postId = c.req.param('id')
         if (!postId) return c.json({ error: 'Post not found.' }, 404)
 
-        const session_result = await getSessionUser(c).catch(() =>
-        c.json({ success: false, error: "Internal server error" }, 500)
-        );
-        if (typeof session_result !== "number") {
-            return session_result;
-        }
-        let userId: number = session_result;
+        const sessionResult = await getSessionUser(c)
+        const userId = typeof sessionResult === 'number' ? sessionResult : null
 
         if (!userId) return c.json({ error: 'Sign in to delete community posts.' }, 401)
         
