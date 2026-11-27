@@ -4,12 +4,10 @@ import { verify } from 'hono/jwt'
 import { app } from '../../index'
 
 const mockExecute = vi.hoisted(() => vi.fn())
-const mockFetch = vi.hoisted(() => vi.fn())
 
 vi.mock('@libsql/client', () => ({
   createClient: () => ({ execute: mockExecute })
 }))
-vi.stubGlobal('fetch', mockFetch)
 
 const validUser = {
   firstName: 'Jane',
@@ -47,8 +45,16 @@ const getToken = (res: Response) => res.headers.get('set-cookie')?.match(/token=
 
 beforeEach(() => {
   mockExecute.mockReset()
-  mockFetch.mockReset()
-  mockFetch.mockImplementation(async () => new Response('OK'))
+})
+
+describe('API response format', () => {
+  it('Returns JSON for an unknown route', async () => {
+    const res = await app.request('/__missing__')
+
+    expect(res.status).toBe(404)
+    expect(res.headers.get('content-type')).toContain('application/json')
+    expect(await res.json()).toEqual({ success: false, error: 'Not found' })
+  })
 })
 
 ///middlewares
@@ -79,6 +85,10 @@ describe('POST /auth/* middlewares', () => {
     const res = await post('/auth/login', body, sameIp)
 
     expect(res.status).toBe(429)
+    expect(await res.json()).toEqual({
+      success: false,
+      error: 'Too many requests, please try again later'
+    })
   })
 
   it('Does not allow cross-origin access on the auth routes', async () => {
@@ -116,24 +126,6 @@ describe('POST /auth/registration', () => {
     const args = mockExecute.mock.calls[0]![0].args
     expect(args.slice(0, 4)).toEqual(['Jane', 'Doe', 'jane.doe@company.com', `hashed:${validUser.password}`])
     expect(args).not.toContain(validUser.password)
-  })
-
-  it('Sends a welcome email', async () => {
-    mockExecute.mockResolvedValue({ lastInsertRowid: 7n, rows: [] })
-
-    await post('/auth/registration', validUser)
-
-    expect(mockFetch).toHaveBeenCalledTimes(1)
-    const body = JSON.parse(mockFetch.mock.calls[0]![1].body)
-    expect(body.template_id).toBe('template-id')
-    expect(body.template_params.to_email).toBe('jane.doe@company.com')
-  })
-
-  it('Does not send an email if the registration fails', async () => {
-    const res = await post('/auth/registration', { ...validUser, passwordConfirm: 'Different123!' })
-
-    expect(res.status).toBe(400)
-    expect(mockFetch).not.toHaveBeenCalled()
   })
 
   it('Does not return the password in the response', async () => {
@@ -248,37 +240,6 @@ describe('POST /auth/login', () => {
       success: true,
       data: { firstName: 'Jane', lastName: 'Doe', email: 'jane.doe@company.com' }
     })
-  })
-
-  it('Sends a login notification email', async () => {
-    mockExecute.mockResolvedValue({ rows: [dbUser] })
-
-    await post('/auth/login', validLogin)
-
-    expect(mockFetch).toHaveBeenCalledTimes(1)
-    const body = JSON.parse(mockFetch.mock.calls[0]![1].body)
-    expect(body.template_id).toBe('login-template-id')
-    expect(body.template_params.title).toBe('New login')
-    expect(body.template_params.to_email).toBe('jane.doe@company.com')
-  })
-
-  it('Does not send an email after a failed login', async () => {
-    mockExecute.mockResolvedValue({ rows: [dbUser] })
-
-    await post('/auth/login', { ...validLogin, password: 'WrongPassword1!' })
-
-    expect(mockFetch).not.toHaveBeenCalled()
-  })
-
-  it('Still logs in if the email can not be sent', async () => {
-    const error = vi.spyOn(console, 'error').mockImplementation(() => { })
-    mockExecute.mockResolvedValue({ rows: [dbUser] })
-    mockFetch.mockRejectedValue(new Error('network down'))
-
-    const res = await post('/auth/login', validLogin)
-
-    expect(res.status).toBe(200)
-    error.mockRestore()
   })
 
   it('Does not return the password hash', async () => {

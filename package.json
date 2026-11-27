@@ -22,5 +22,12 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@tanstack/react-router": "^1.170.46",
+    "@tursodatabase/database": "^0.8.4",
+    "@tursodatabase/serverless": "^1.4.1",
+    "@tursodatabase/sync": "^0.8.4",
+    "install": "^0.13.0"
+  }
 }

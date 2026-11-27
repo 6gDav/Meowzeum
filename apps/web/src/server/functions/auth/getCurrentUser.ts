@@ -24,9 +24,9 @@ export const getCurrentUserFunc = createServerFn({ method: 'GET' }).handler(
         cookie: cookieHeader,
         'x-internal-key': INTERNAL_API_KEY,
       },
-    }).catch(() => null)
+    })
 
-    if (!res || !res.ok) return null
+    if (!res.ok) return null
 
     const json = await res.json().catch(() => null)
     return json?.success ? json.data : null

@@ -58,6 +58,8 @@ function ManageUserPage() {
         }
     }, [previewUrl])
 
+    if (!currentUser) return null
+
     const initials =
         `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase() || '?'
 
@@ -74,16 +76,15 @@ function ManageUserPage() {
         if (fileRef.current) fileRef.current.value = ''
     }
 
-    const avatarSrc =
-        previewUrl ??
-        (user?.avatar
-            ? user.avatar.startsWith("data:")
-                ? user.avatar
-                : `data:image/png;base64,${user.avatar}`
-            : null)
+    const avatarSrc = user?.avatar
+        ? user.avatar.startsWith("data:")
+            ? user.avatar
+            : `data:image/png;base64,${user.avatar}`
+        : null;
 
+    const _queryClientProfileUpdate = useQueryClient()
     const updateProfile = useMutation(updateProfileMutation())
-    const [formError, setFormError] = useState<string | null>(null)
+    const [_formError, setFormError] = useState<string | null>(null)
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -138,12 +139,11 @@ function ManageUserPage() {
             {
                 onSuccess: (updated) => {
                     queryClient.invalidateQueries({ queryKey: ['currentUser'] })
-                    setUser((prev) => ({
-                        ...prev,
+                    setUser({
                         firstName: updated.firstName,
                         lastName: updated.lastName,
                         email: updated.email,
-                    }))
+                    })
                     setShowPass(false)
                     setShowConfirm(false)
                     setFormKey((k) => k + 1)
@@ -184,8 +184,6 @@ function ManageUserPage() {
     const handleDelete = () => {
         deleteProfile.mutate()
     }
-
-    if (!currentUser) return null
 
     return (
         <main className="min-h-screen bg-[#fdf6e2] px-4 py-10 sm:py-16">
@@ -386,12 +384,6 @@ function ManageUserPage() {
                     {saved && (
                         <p role="status" className="text-sm font-semibold text-green-700">
                             Changes saved.
-                        </p>
-                    )}
-
-                    {formError && (
-                        <p id="m-form-err" role="alert" className="text-sm text-red-800">
-                            {formError}
                         </p>
                     )}
 

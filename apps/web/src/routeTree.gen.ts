@@ -10,12 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PagesAboutRouteImport } from './routes/pages/about'
 import { Route as PagesAuthRouteImport } from './routes/pages/auth'
+import { Route as PagesCommunityRouteImport } from './routes/pages/community'
 import { Route as PagesGalleryRouteImport } from './routes/pages/gallery'
+import { Route as PagesProfileRouteImport } from './routes/pages/profile'
+import { Route as PagesWelcomePageRouteImport } from './routes/pages/welcomePage'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PagesAboutRoute = PagesAboutRouteImport.update({
+  id: '/pages/about',
+  path: '/pages/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PagesAuthRoute = PagesAuthRouteImport.update({
@@ -23,40 +32,93 @@ const PagesAuthRoute = PagesAuthRouteImport.update({
   path: '/pages/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PagesCommunityRoute = PagesCommunityRouteImport.update({
+  id: '/pages/community',
+  path: '/pages/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PagesGalleryRoute = PagesGalleryRouteImport.update({
   id: '/pages/gallery',
   path: '/pages/gallery',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PagesProfileRoute = PagesProfileRouteImport.update({
+  id: '/pages/profile',
+  path: '/pages/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PagesWelcomePageRoute = PagesWelcomePageRouteImport.update({
+  id: '/pages/welcomePage',
+  path: '/pages/welcomePage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/pages/about': typeof PagesAboutRoute
   '/pages/auth': typeof PagesAuthRoute
+  '/pages/community': typeof PagesCommunityRoute
   '/pages/gallery': typeof PagesGalleryRoute
+  '/pages/profile': typeof PagesProfileRoute
+  '/pages/welcomePage': typeof PagesWelcomePageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/pages/about': typeof PagesAboutRoute
   '/pages/auth': typeof PagesAuthRoute
+  '/pages/community': typeof PagesCommunityRoute
   '/pages/gallery': typeof PagesGalleryRoute
+  '/pages/profile': typeof PagesProfileRoute
+  '/pages/welcomePage': typeof PagesWelcomePageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/pages/about': typeof PagesAboutRoute
   '/pages/auth': typeof PagesAuthRoute
+  '/pages/community': typeof PagesCommunityRoute
   '/pages/gallery': typeof PagesGalleryRoute
+  '/pages/profile': typeof PagesProfileRoute
+  '/pages/welcomePage': typeof PagesWelcomePageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/pages/auth' | '/pages/gallery'
+  fullPaths:
+    | '/'
+    | '/pages/about'
+    | '/pages/auth'
+    | '/pages/community'
+    | '/pages/gallery'
+    | '/pages/profile'
+    | '/pages/welcomePage'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/pages/auth' | '/pages/gallery'
-  id: '__root__' | '/' | '/pages/auth' | '/pages/gallery'
+  to:
+    | '/'
+    | '/pages/about'
+    | '/pages/auth'
+    | '/pages/community'
+    | '/pages/gallery'
+    | '/pages/profile'
+    | '/pages/welcomePage'
+  id:
+    | '__root__'
+    | '/'
+    | '/pages/about'
+    | '/pages/auth'
+    | '/pages/community'
+    | '/pages/gallery'
+    | '/pages/profile'
+    | '/pages/welcomePage'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PagesAboutRoute: typeof PagesAboutRoute
   PagesAuthRoute: typeof PagesAuthRoute
+  PagesCommunityRoute: typeof PagesCommunityRoute
   PagesGalleryRoute: typeof PagesGalleryRoute
+  PagesProfileRoute: typeof PagesProfileRoute
+  PagesWelcomePageRoute: typeof PagesWelcomePageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,11 +130,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pages/about': {
+      id: '/pages/about'
+      path: '/pages/about'
+      fullPath: '/pages/about'
+      preLoaderRoute: typeof PagesAboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pages/auth': {
       id: '/pages/auth'
       path: '/pages/auth'
       fullPath: '/pages/auth'
       preLoaderRoute: typeof PagesAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pages/community': {
+      id: '/pages/community'
+      path: '/pages/community'
+      fullPath: '/pages/community'
+      preLoaderRoute: typeof PagesCommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pages/gallery': {
@@ -82,13 +158,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PagesGalleryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pages/profile': {
+      id: '/pages/profile'
+      path: '/pages/profile'
+      fullPath: '/pages/profile'
+      preLoaderRoute: typeof PagesProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pages/welcomePage': {
+      id: '/pages/welcomePage'
+      path: '/pages/welcomePage'
+      fullPath: '/pages/welcomePage'
+      preLoaderRoute: typeof PagesWelcomePageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PagesAboutRoute: PagesAboutRoute,
   PagesAuthRoute: PagesAuthRoute,
+  PagesCommunityRoute: PagesCommunityRoute,
   PagesGalleryRoute: PagesGalleryRoute,
+  PagesProfileRoute: PagesProfileRoute,
+  PagesWelcomePageRoute: PagesWelcomePageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

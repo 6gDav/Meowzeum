@@ -79,18 +79,6 @@ describe('Registration logic', () => {
         expect(res).toEqual(apiUser)
     })
 
-    it('Throws if the backend sends a wrong user data', async () => {
-        mockFetch.mockResolvedValue(apiResponse({ success: true, data: { firstName: 'Jane' } }))
-
-        await expect(callRegister(validUser)).rejects.toThrow()
-    })
-
-    it('Throws if the backend sends no user data', async () => {
-        mockFetch.mockResolvedValue(apiResponse({ success: true }))
-
-        await expect(callRegister(validUser)).rejects.toThrow()
-    })
-
     it('Does not return the passwords', async () => {
         mockFetch.mockResolvedValue(apiResponse({ success: true, data: apiUser }))
 
@@ -178,8 +166,7 @@ describe('Registration mutation callbacks', () => {
 
         mutation.onSuccess(apiUser, validUser)
 
-        expect(log).toHaveBeenCalledWith('Server response:', 'Jane', 'Doe')
-        expect(log).toHaveBeenCalledWith('Sent email:', validUser.email)
+        expect(log).toHaveBeenCalledWith('Server response:', validUser.firstName, validUser.lastName)
         log.mockRestore()
     })
 

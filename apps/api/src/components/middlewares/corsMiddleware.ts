@@ -6,7 +6,7 @@ export const publicCors = cors({
   allowMethods: ['GET'],
 })
 
-//Auth route cors it is implemented but never used
+//Auth route cors
 const PRODUCTION_ORIGIN = "https://meowzeum-henna.vercel.app";
 
 const LOCAL_ORIGIN_REGEX = /^http:\/\/(localhost|127\.0\.0\.1)(:\d{1,5})?$/;
@@ -17,7 +17,7 @@ const isAllowedOrigin = (origin: string): boolean =>
 export const authCors = cors({
   origin: (origin) => (isAllowedOrigin(origin) ? origin : null),
   credentials: true,
-  allowMethods: ["GET", "POST", "PATCH", "DELETE"],
+  allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowHeaders: ["Content-Type"],
   maxAge: 86400,
 });

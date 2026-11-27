@@ -44,12 +44,7 @@ export async function deleteProfile(c: Context) {
     }
 
     // 3) Expire the session cookie
-    deleteCookie(c, "token", {
-        httpOnly: true,
-        secure: true,
-        sameSite: "None",
-        path: "/",
-    });
+    deleteCookie(c, "session", { path: "/" });
 
     // 4) Notify by email about the account deletion
     sendEmail({
@@ -57,7 +52,7 @@ export async function deleteProfile(c: Context) {
         name: `${user.firstName} ${user.lastName}`,
         title: "Account deleted",
         templateId: process.env.EMAILJS_LOGIN_TEMPLATE_ID, 
-        message: `Your Meowzeum account was deleted on ${emilSendTime()}, together with all your posts. If this was you, there is nothing else to do. If you did not do this, please contact us immediately.`,
+        message: `Your Meowzeum account was deleted on ${emilSendTime}, together with all your posts. If this was you, there is nothing else to do. If you did not do this, please contact us immediately.`,
     }).catch((err) => console.error("Account deletion email failed:", err));
 
     return c.json({ success: true });

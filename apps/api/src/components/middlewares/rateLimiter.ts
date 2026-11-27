@@ -15,7 +15,7 @@ function limiter(limitCount: number) {
     },
     handler: (c) => {
       console.log('Fetch blocked to avoid overload')
-      return c.text('Too much request, please try again later', 429)
+      return c.json({ success: false, error: 'Too many requests, please try again later' }, 429)
     }
   })
 }

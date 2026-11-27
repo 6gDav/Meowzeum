@@ -81,9 +81,6 @@ export async function updateProfile(c: Context) {
             email: String(row.email),
         };
     } catch (err) {
-        if (err instanceof Error && err.message.includes("UNIQUE")) {
-            return c.json({ success: false, error: "Email is already in use" }, 409);
-        }
         console.error("updateProfile DB error (update):", err);
         return c.json({ success: false, error: "Internal server error" }, 500);
     }
@@ -96,7 +93,7 @@ export async function updateProfile(c: Context) {
             name: `${user.firstName} ${user.lastName}`,
             title: "Password changed",
             templateId: process.env.EMAILJS_LOGIN_TEMPLATE_ID, 
-            message: `The password of your Meowzeum account was changed on ${emilSendTime()}. If this was you, there is nothing else to do. If you did not change it, please contact us immediately.`,
+            message: `The password of your Meowzeum account was changed on ${emilSendTime}. If this was you, there is nothing else to do. If you did not change it, please contact us immediately.`,
         }).catch((err) => console.error("Password change email failed:", err));
     }
 

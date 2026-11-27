@@ -14,7 +14,10 @@
     "@Meowzeum/shared-types": "workspace:*",
     "@hono/zod-validator": "^0.9.1",
     "@libsql/client": "^0.18.0",
-    "hono": "^4.13.14"
+    "@tensorflow-models/coco-ssd": "2.2.3",
+    "@tensorflow/tfjs": "4.22.0",
+    "hono": "^4.13.14",
+    "sharp": "^0.35.5"
   },
   "scripts": {
     "dev": "bun --hot src/index.ts"

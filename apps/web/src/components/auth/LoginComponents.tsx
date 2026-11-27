@@ -1,7 +1,7 @@
 import React from 'react'
-import { styles, type ComponetsFormProps } from './CommonInterfaces'
-import { useMutation } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
+import { styles, type ComponetsFormProps } from '../CommonInterfaces'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate, useRouter } from '@tanstack/react-router'
 import { loginUserMutation } from '#/server/functions/auth/userLogin'
 
 export default function LoginComponents({
@@ -14,10 +14,16 @@ export default function LoginComponents({
     const errorClasses = styles.error
 
     const navigate = useNavigate()
+    const router = useRouter()
+    const queryClient = useQueryClient()
 
     const mutationLogin = useMutation({
         ...loginUserMutation(),
-        onSuccess: () => navigate({ to: '/' }),
+        onSuccess: async (user) => {
+            queryClient.setQueryData(['currentUser'], user)
+            await router.invalidate()
+            await navigate({ to: '/pages/welcomePage' })
+        },
     })
 
     const handleSubmitLogin = (e: React.FormEvent<HTMLFormElement>) => {
@@ -100,6 +106,17 @@ export default function LoginComponents({
                 >
                     {mutationLogin.isPending ? 'Logging in…' : 'Login'}
                 </button>
+                {mutationLogin.isError && (
+                    <p role="alert" className="text-sm font-semibold text-red-700">
+                        {mutationLogin.error.message}
+                    </p>
+                )}
+                {mutationLogin.isSuccess && (
+                    <p role="status" className="text-sm font-semibold text-green-800">
+                        You are signed in.{' '}
+                        <Link to="/pages/community" className="underline">Return to the community</Link>
+                    </p>
+                )}
 
                 <p className="text-center text-sm text-stone-600 pt-2">
                     New to Meowzeum?{' '}

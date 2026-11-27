@@ -1,13 +1,12 @@
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseHeader } from '@tanstack/react-start/server'
 import { mutationOptions } from '@tanstack/react-query'
-import { LoginInputSchema, type LoginInput } from '@Meowzeum/shared-types'
+import { LoginInputSchema, SessionJWTSchema, type LoginInput, type SessionJWT } from '@Meowzeum/shared-types'
 
-type LoginUser = { id: number; firstName: string; lastName: string; email: string }
 
 const loginUserFunc = createServerFn({ method: 'POST' })
     .validator((data: LoginInput) => LoginInputSchema.parse(data))
-    .handler(async ({ data }): Promise<LoginUser> => {
+    .handler(async ({ data }): Promise<SessionJWT> => {
         const API_URL =
             process.env.API_URL ??
             (process.env.NODE_ENV === 'production'
@@ -28,7 +27,20 @@ const loginUserFunc = createServerFn({ method: 'POST' })
             body: JSON.stringify(data),
         })
 
-        const json = await res.json().catch(() => null)
+        const responseText = await res.text()
+        let json: { success?: boolean; error?: string; data?: unknown }
+        try {
+            json = JSON.parse(responseText)
+        } catch {
+            const contentType = res.headers.get('content-type') ?? 'unknown'
+            console.error('Login API returned a non-JSON response:', {
+                status: res.status,
+                contentType,
+            })
+            throw new Error(`Login API returned a non-JSON response (HTTP ${res.status}, ${contentType})`)
+        }
+
+        //console.log('Server response:', json)
 
         if (!res.ok || !json?.success) {
             throw new Error(json?.error ?? 'Login failed')
@@ -37,17 +49,16 @@ const loginUserFunc = createServerFn({ method: 'POST' })
         const cookies = res.headers.getSetCookie()
         if (cookies.length) setResponseHeader('Set-Cookie', cookies)
 
-        return json.data
-    })
+        return SessionJWTSchema.parse(json.data)
+})
 
-export const loginUserMutation = () =>
-    mutationOptions({
-        mutationFn: (data: LoginInput) => loginUserFunc({ data }),
-        onSuccess: (responseData, variables) => {
-            console.log('Server response:', responseData.firstName)
-            console.log('Sent email:', variables.email)
-        },
-        onError: (error, variables) => {
-            console.error('Unsuccesfull login:', variables.email, error)
-        }
-    })
+export const loginUserMutation = () => mutationOptions({
+    mutationFn: (data: LoginInput) => loginUserFunc({ data }),
+    onSuccess: (responseData, variables) => {
+        console.log('Server response:', responseData.firstName)
+        console.log('Sent email:', variables.email)
+    },
+    onError: (error, variables) => {
+        console.error('Unsuccesfull login:', variables.email, error)
+    }
+})

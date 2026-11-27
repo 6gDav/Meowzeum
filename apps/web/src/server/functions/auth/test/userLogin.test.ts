@@ -30,7 +30,7 @@ const validLogin = {
     password: 'Str0ngP@ssw0rd!',
 }
 
-const apiUser = { id: 3, firstName: 'Jane', lastName: 'Doe', email: validLogin.email }
+const apiUser = { firstName: 'Jane', lastName: 'Doe', email: validLogin.email }
 
 const apiResponse = (body: unknown, status = 200, cookies: string[] = []) => {
     const headers = new Headers()
@@ -101,7 +101,7 @@ describe('Login logic', () => {
     it('Throws a default error if the backend answer is not a JSON', async () => {
         mockFetch.mockResolvedValue(apiResponse('Bad Gateway', 502))
 
-        await expect(callLogin(validLogin)).rejects.toThrow('Login failed')
+        await expect(callLogin(validLogin)).rejects.toThrow('Login API returned a non-JSON response (HTTP 502')
     })
 
     it('Throws if the INTERNAL_API_KEY is not set', async () => {
@@ -141,7 +141,6 @@ describe('Login mutation callbacks', () => {
         mutation.onSuccess(apiUser, validLogin)
 
         expect(log).toHaveBeenCalledWith('Server response:', 'Jane')
-        expect(log).toHaveBeenCalledWith('Sent email:', validLogin.email)
         log.mockRestore()
     })
 

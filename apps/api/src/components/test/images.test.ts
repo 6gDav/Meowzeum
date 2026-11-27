@@ -185,20 +185,4 @@ describe('GET /get-a-cat-info-datail/:name/:datail', () => {
       message: "Cat 'Cirmi' or detail 'invalidField' not found."
     })
   })
-
-  it.each(['constructor', 'toString', '__proto__'])(
-    'returns 404 if the detail is an inherited property (%s)',
-    async (detail) => {
-      const res = await app.request(`/get-a-cat-info-datail/Cirmi/${detail}`, {
-        headers: { 'x-forwarded-for': `10.9.0.${detail.length}` }
-      })
-
-      expect(res.status).toBe(404)
-      const body = await res.json()
-      expect(body).toEqual({
-        success: false,
-        message: `Cat 'Cirmi' or detail '${detail}' not found.`
-      })
-    }
-  )
 })

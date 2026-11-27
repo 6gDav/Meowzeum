@@ -1,14 +1,11 @@
 import { Link, createFileRoute } from "@tanstack/react-router"
 import CursorWatchingCat from "#/components/catEye/catEye"
-import Expetion from "#/components/exeptionMaker"
 
 export const Route = createFileRoute('/')({
   component: Home,
 })
 
 function Home() {
-  Expetion()
-
   return (
     <div className="min-h-screen bg-[#fdf6e2] text-stone-800">
       <main className="mx-auto flex max-w-5xl flex-col items-center px-5 pb-20 pt-14 text-center sm:px-8 sm:pt-20">

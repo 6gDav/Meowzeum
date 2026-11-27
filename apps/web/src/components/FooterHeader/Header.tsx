@@ -94,22 +94,16 @@ const Header = () => {
               Home
             </Link>
             <a
-              href="#features"
+              href="/pages/gallery"
               className="text-[#b45309] hover:text-[#d97706] font-medium text-sm transition-colors duration-200"
             >
-              Features
+              Gallery
             </a>
             <a
-              href="#pricing"
+              href="/pages/community"
               className="text-[#b45309] hover:text-[#d97706] font-medium text-sm transition-colors duration-200"
             >
-              Pricing
-            </a>
-            <a
-              href="#about"
-              className="text-[#b45309] hover:text-[#d97706] font-medium text-sm transition-colors duration-200"
-            >
-              About
+              Community
             </a>
           </nav>
 
@@ -147,13 +141,12 @@ const Header = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-[#fdf6e2] border-t border-[#e5a965]">
           <div className="px-4 pt-2 pb-4 space-y-1">
-            <Link
-              to="/"
-              onClick={() => setIsMobileMenuOpen(false)}
+            <a
+              href="#"
               className="block px-3 py-2 rounded-md text-base font-medium text-[#b45309] hover:bg-[#e5a965]/30 hover:text-[#d97706] transition-colors"
             >
               Home
-            </Link>
+            </a>
             <a
               href="#"
               className="block px-3 py-2 rounded-md text-base font-medium text-[#b45309] hover:bg-[#e5a965]/30 hover:text-[#d97706] transition-colors"

@@ -9,8 +9,6 @@ import { emilSendTime } from "./helper/getCurretnTime";
 //secure dummy hash
 const DUMMY_HASH = await Bun.password.hash("dummy-password-for-timing");
 
-const INVALID_CREDENTIALS = { success: false, error: "Invalid email or password" };
-
 export async function loginUser(c: Context) {
     // 1) Validate schema
     let body: unknown;
@@ -61,20 +59,25 @@ export async function loginUser(c: Context) {
         return c.json({ success: false, error: "Internal server error" }, 500);
     }
 
+    if (!user)
+    {
+        console.error("user is not found");
+    }
+
     // 3) Argon2 verify 
     const passwordOk = await Bun.password.verify(password, user?.password_hash ?? DUMMY_HASH);
     if (!user || !passwordOk) {
-        return c.json(INVALID_CREDENTIALS, 401);
+        return c.json({ success: false, error: "Invalid email or password" }, 401);
     }
 
     // 4) send email
-    sendEmail({
+    /*sendEmail({
         to: user.email,
         name: `${user.firstName} ${user.lastName}`,
         title: "New login",
         templateId: process.env.EMAILJS_LOGIN_TEMPLATE_ID,
-        message: `We noticed a new login to your Meowzeum account on ${emilSendTime()}. If this was you, there is nothing else to do and you can happily continue browsing the gallery. If you did not log in, please change your password as soon as possible.`,
-    }).catch((err) => console.error("Login email failed:", err));
+        message: `We noticed a new login to your Meowzeum account on ${emilSendTime}. If this was you, there is nothing else to do and you can happily continue browsing the gallery. If you did not log in, please change your password as soon as possible.`,
+    }).catch((err) => console.error("Login email failed:", err));*/
 
     return createSessionResponse(c, user);
 }
