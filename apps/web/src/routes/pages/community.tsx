@@ -14,11 +14,45 @@ export const Route = createFileRoute('/pages/community')({
   component: Community,
 })
 
+let catModelPromise: ReturnType<typeof loadCatModel> | undefined
+
+async function loadCatModel() {
+  if (import.meta.env.SSR) {
+    throw new Error('Cat detection is only available in the browser.')
+  }
+
+  await import('@tensorflow/tfjs')
+  const cocoSsd = await import('@tensorflow-models/coco-ssd')
+  return cocoSsd.load()
+}
+
+function getCatModel() {
+  if (!catModelPromise) {
+    catModelPromise = loadCatModel().catch((error: unknown) => {
+      catModelPromise = undefined
+      throw error
+    })
+  }
+  return catModelPromise
+}
+
+async function imageContainsCat(imageUrl: string) {
+  const image = new Image()
+  image.crossOrigin = 'anonymous'
+  image.src = imageUrl
+
+  const [model] = await Promise.all([getCatModel(), image.decode()])
+  const detections = await model.detect(image)
+  return detections.some((detection) => detection.class === 'cat' && detection.score > 0.6)
+}
+
 function Community() {
   const queryClient = useQueryClient()
   const [imageUrl, setImageUrl] = useState('')
   const [caption, setCaption] = useState('')
   const [formError, setFormError] = useState('')
+  const [isCheckingImage, setIsCheckingImage] = useState(false)
+  const isCheckingImageRef = useRef(false)
   const loadMoreRef = useRef<HTMLDivElement>(null)
 
   const sessionQuery = useQuery({
@@ -83,8 +117,9 @@ function Community() {
 
   const posts = feedQuery.data?.pages.flatMap((page) => page.posts) ?? []
 
-  function submitPost(event: React.FormEvent<HTMLFormElement>) {
+  async function submitPost(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (isCheckingImageRef.current || postMutation.isPending) return
     setFormError('')
 
     if (!sessionQuery.data?.user) {
@@ -107,9 +142,26 @@ function Community() {
       return
     }
 
-    postMutation.mutate({
-      data: { imageUrl: imageUrl.trim(), caption: caption.trim() },
-    })
+    const photoUrl = imageUrl.trim()
+    isCheckingImageRef.current = true
+    setIsCheckingImage(true)
+    try {
+      if (!await imageContainsCat(photoUrl)) {
+        setFormError('No cat was detected in that photo. Choose an image that clearly shows a cat.')
+        return
+      }
+
+      postMutation.mutate({
+        data: { imageUrl: photoUrl, caption: caption.trim() },
+      })
+    } catch (error) {
+      setFormError(error instanceof Error
+        ? `We couldn't verify this photo: ${error.message}`
+        : "We couldn't verify this photo. Check the image URL and try again.")
+    } finally {
+      isCheckingImageRef.current = false
+      setIsCheckingImage(false)
+    }
   }
 
   function toggleLike(post: CommunityPost) {
@@ -241,7 +293,7 @@ function Community() {
           <aside className="order-1 h-fit rounded-3xl border border-[#d97706]/15 bg-white p-5 shadow-sm shadow-[#713f12]/5 lg:sticky lg:top-6 lg:order-2">
             <h2 className="font-serif text-xl font-bold text-[#713f12]">Share a cat photo</h2>
             <p className="mt-1 text-sm leading-6 text-stone-500">
-              Add a photo link and a little story for the community.
+              Add a photo link and a little story for the community. We check that each photo includes a cat before sharing.
             </p>
             {!sessionQuery.isPending && !sessionQuery.isError && !sessionQuery.data?.user ? (
               <p className="mt-4 text-sm leading-6 text-stone-600">
@@ -273,12 +325,15 @@ function Community() {
                 />
               </label>
               {formError && <p role="alert" className="text-sm font-semibold text-red-700">{formError}</p>}
+              {isCheckingImage && (
+                <p role="status" className="text-sm text-stone-500">Checking the photo for a cat…</p>
+              )}
               <button
                 type="submit"
-                disabled={postMutation.isPending || sessionQuery.isPending || !sessionQuery.data?.user}
+                disabled={postMutation.isPending || isCheckingImage || sessionQuery.isPending || !sessionQuery.data?.user}
                 className="w-full rounded-full bg-[#b45309] px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#92400e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b45309] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {postMutation.isPending ? 'Sharing…' : 'Share with the community'}
+                {isCheckingImage ? 'Checking photo…' : postMutation.isPending ? 'Sharing…' : 'Share with the community'}
               </button>
             </form>
             )}
