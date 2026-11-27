@@ -19,6 +19,13 @@ app.use('*', cors({
 }))
 app.use('*', logger())
 
+app.onError((err, c) => {
+  console.error('Unhandled API error:', err)
+  return c.json({ success: false, error: 'Internal server error' }, 500)
+})
+
+app.notFound((c) => c.json({ success: false, error: 'Not found' }, 404))
+
 app.get('/favicon.ico', (c) => c.body(null, 204))
 
 app.route('/', catImagesRouter)     // :: /get-a-cat-image => http://localhost:3001/get-a-cat-image

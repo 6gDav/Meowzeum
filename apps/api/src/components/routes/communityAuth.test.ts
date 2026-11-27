@@ -1,10 +1,14 @@
 import { describe, expect, it, vi } from 'vitest'
 
-vi.mock('../db', () => ({
-  db: { prepare: vi.fn() },
+vi.mock('../auth/helper/tursoClient.ts', () => ({
+  turso: { execute: vi.fn() },
 }))
 
-import { db } from '../db'
+vi.mock('../authSession', () => ({
+  getSessionUserId: () => null,
+}))
+
+import { turso } from '../auth/helper/tursoClient.ts'
 import { createCommunityRouter } from './community'
 
 describe('community write authentication', () => {
@@ -20,7 +24,7 @@ describe('community write authentication', () => {
     })
 
     expect(response.status).toBe(401)
-    expect(db.prepare).not.toHaveBeenCalled()
+    expect(turso.execute).not.toHaveBeenCalled()
   })
 
   it('rejects unauthenticated like requests even when a viewer id is supplied', async () => {
@@ -31,7 +35,7 @@ describe('community write authentication', () => {
     })
 
     expect(response.status).toBe(401)
-    expect(db.prepare).not.toHaveBeenCalled()
+    expect(turso.execute).not.toHaveBeenCalled()
   })
 
   it('rejects unauthenticated caption edit requests', async () => {
@@ -42,6 +46,6 @@ describe('community write authentication', () => {
     })
 
     expect(response.status).toBe(401)
-    expect(db.prepare).not.toHaveBeenCalled()
+    expect(turso.execute).not.toHaveBeenCalled()
   })
 })

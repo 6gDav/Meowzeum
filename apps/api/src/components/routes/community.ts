@@ -85,13 +85,21 @@ export function createCommunityRouter()
                 LIMIT ?`,
             args: [viewerUserId, cursor ?? null, cursor ?? null, cursor ?? null, cursor ?? null, limit + 1],
         });
-        const rows = await result.rows
+        const rows = result.rows
 
         const hasMore = rows.length > limit
-        const posts = rows.slice(0, limit).map((post) => ({
-            ...post,
-            likedByViewer: Boolean(post.likedByViewer),
-        }))
+        const posts = rows.slice(0, limit).map((post) => {
+            const id = Number(post.id)
+            return {
+                id,
+                author: String(post.author),
+                imageUrl: String(post.imageUrl),
+                caption: String(post.caption ?? ''),
+                createdAt: String(post.createdAt),
+                likeCount: Number(post.likeCount ?? 0),
+                likedByViewer: Boolean(post.likedByViewer),
+            }
+        })
 
         return c.json({
             posts,
@@ -104,17 +112,17 @@ export function createCommunityRouter()
         const sessionUserId = getSessionUserId(c.req.header('cookie'))
         if (!sessionUserId) return c.json({ error: 'Sign in to create community posts.' }, 401)
 
+        if (!c.req.header('content-type')?.includes('application/json'))
+        {
+            return c.json({ error: 'Content-Type must be application/json.' }, 415)
+        }
+
         const result = await turso.execute({
             sql: `SELECT id FROM users WHERE id = ?`,
             args: [sessionUserId],
         });
         const user = result.rows[0];
         if (!user) return c.json({ error: 'Sign in to create community posts.' }, 401)
-
-        if (!c.req.header('content-type')?.includes('application/json'))
-        {
-            return c.json({ error: 'Content-Type must be application/json.' }, 415)
-        }
 
         let rawBody: unknown
         try
@@ -144,12 +152,16 @@ export function createCommunityRouter()
         }
         
         // execute
-        await turso.execute({
+        const insertResult = await turso.execute({
             sql: `INSERT INTO cat_posts (author, image_url, caption, created_at) VALUES (?, ?, ?, ?)`,
             args: [post.author, post.imageUrl, post.caption, post.createdAt],
         });
 
-        return c.json({ post: { ...post, likeCount: 0, likedByViewer: false } }, 201)
+        const id = typeof insertResult.lastInsertRowid === 'bigint'
+            ? Number(insertResult.lastInsertRowid)
+            : Number(insertResult.lastInsertRowid)
+
+        return c.json({ post: { id, ...post, likeCount: 0, likedByViewer: false } }, 201)
     })
 
     // like or unlike post by id
@@ -210,7 +222,7 @@ export function createCommunityRouter()
             sql: `SELECT COUNT(*) AS likeCount FROM cat_post_likes WHERE post_id = ?`,
             args: [postId],
         });
-        const likeCount = like_result.rows[0] ?? 0
+        const likeCount = Number(like_result.rows[0]?.likeCount ?? 0)
 
         return c.json({ liked, likeCount })
     })
@@ -246,11 +258,13 @@ export function createCommunityRouter()
         const user = await user_result.rows[0]
         if (!user) return c.json({ error: 'Sign in to edit community posts.' }, 401)
 
+        if (!postId) return c.json({ error: 'Post not found.' }, 404)
+
         const post_result = await turso.execute({
             sql: `SELECT id,author FROM cat_posts WHERE id = ?`,
             args: [postId],
         })
-        const post = await post_result.rows[0];
+        const post = post_result.rows[0];
         if (!post) return c.json({ error: 'Post not found.' }, 404)
         if (String(post.author) !== String(sessionUserId)) return c.json({ error: 'You can only edit your own posts.' }, 403)
 
@@ -272,19 +286,8 @@ export function createCommunityRouter()
 
     // delete own post by id
     router.delete('/community/posts/:id', async (c) => {
-        if (!c.req.header('content-type')?.includes('application/json')) return c.json({ error: 'Content-Type must be application/json.' }, 415)
-
-        let rawBody: unknown
-        try
-        {
-            rawBody = await c.req.json()
-        }
-        catch
-        {
-            return c.json({ error: 'Request body must be valid JSON.' }, 400)
-        }
-
         const postId = c.req.param('id')
+        if (!postId) return c.json({ error: 'Post not found.' }, 404)
 
         const sessionUserId = getSessionUserId(c.req.header('cookie'))
         if (!sessionUserId) return c.json({ error: 'Sign in to delete community posts.' }, 401)
@@ -298,19 +301,23 @@ export function createCommunityRouter()
 
         const posts_result = await turso.execute({
             sql: `SELECT id,author FROM cat_posts WHERE id = ?`,
-            args: [postId, sessionUserId],
+            args: [postId],
         })
-        const posts = await posts_result.rows; 
+        const post = posts_result.rows[0]
 
         // ha a poszt nem létezik
-        if (!posts || !posts.id || !posts.author) return c.json({ error: 'Post not found.' }, 404)
+        if (!post) return c.json({ error: 'Post not found.' }, 404)
         
         // ha az user nem author, hiba
-        if (posts.author !== sessionUserId) return c.json({ error: 'You can only delete your own posts.' }, 403)
+        if (String(post.author) !== String(sessionUserId)) return c.json({ error: 'You can only delete your own posts.' }, 403)
 
         await turso.execute({
-            sql: `DELETE FROM cat_post_likes WHERE post_id = ? AND visitor_id = ?`,
-            args: [postId, sessionUserId],
+            sql: `DELETE FROM cat_post_likes WHERE post_id = ?`,
+            args: [postId],
+        })
+        await turso.execute({
+            sql: `DELETE FROM cat_posts WHERE id = ?`,
+            args: [postId],
         })
 
         return c.json({ message: 'Post deleted successfully.' })

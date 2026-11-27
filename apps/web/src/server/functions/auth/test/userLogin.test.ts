@@ -101,7 +101,7 @@ describe('Login logic', () => {
     it('Throws a default error if the backend answer is not a JSON', async () => {
         mockFetch.mockResolvedValue(apiResponse('Bad Gateway', 502))
 
-        await expect(callLogin(validLogin)).rejects.toThrow('Login failed')
+        await expect(callLogin(validLogin)).rejects.toThrow('Login API returned a non-JSON response (HTTP 502')
     })
 
     it('Throws if the INTERNAL_API_KEY is not set', async () => {

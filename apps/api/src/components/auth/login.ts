@@ -56,7 +56,7 @@ export async function loginUser(c: Context) {
         }
     } catch (err) {
         console.error("loginUser DB error:", err);
-        return c.json({ success: false, error: "Internal server error" }, 500);
+        return c.json({ success: false, error: "Internal server error: "+err }, 500);
     }
 
     // 3) Argon2 verify 

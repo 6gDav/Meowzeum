@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseHeader } from '@tanstack/react-start/server'
 import { mutationOptions } from '@tanstack/react-query'
-import { LoginInputSchema, type LoginInput, type SessionJWT } from '@Meowzeum/shared-types'
+import { LoginInputSchema, SessionJWTSchema, type LoginInput, type SessionJWT } from '@Meowzeum/shared-types'
 
 
 const loginUserFunc = createServerFn({ method: 'POST' })
@@ -27,10 +27,18 @@ const loginUserFunc = createServerFn({ method: 'POST' })
             body: JSON.stringify(data),
         })
 
-        const json = await res.json().catch((err) => {
-            console.error('Error parsing JSON response:', err)
-            throw new Error('Got invalid JSON response from server')
-        })
+        const responseText = await res.text()
+        let json: { success?: boolean; error?: string; data?: unknown }
+        try {
+            json = JSON.parse(responseText)
+        } catch {
+            const contentType = res.headers.get('content-type') ?? 'unknown'
+            console.error('Login API returned a non-JSON response:', {
+                status: res.status,
+                contentType,
+            })
+            throw new Error(`Login API returned a non-JSON response (HTTP ${res.status}, ${contentType})`)
+        }
 
         //console.log('Server response:', json)
 
@@ -41,7 +49,7 @@ const loginUserFunc = createServerFn({ method: 'POST' })
         const cookies = res.headers.getSetCookie()
         if (cookies.length) setResponseHeader('Set-Cookie', cookies)
 
-        return json.data
+        return SessionJWTSchema.parse(json.data)
 })
 
 export const loginUserMutation = () => mutationOptions({

@@ -47,6 +47,16 @@ beforeEach(() => {
   mockExecute.mockReset()
 })
 
+describe('API response format', () => {
+  it('Returns JSON for an unknown route', async () => {
+    const res = await app.request('/__missing__')
+
+    expect(res.status).toBe(404)
+    expect(res.headers.get('content-type')).toContain('application/json')
+    expect(await res.json()).toEqual({ success: false, error: 'Not found' })
+  })
+})
+
 ///middlewares
 describe('POST /auth/* middlewares', () => {
   it('Returns 403 without the internal key', async () => {
@@ -69,12 +79,16 @@ describe('POST /auth/* middlewares', () => {
     const body = { email: 'jane@doe.com', password: 'pass' }
 
     for (let i = 0; i < 5; i++) {
-      const res = await post('/auth/login', body, sameIp)
+      const res = await post('/login', body, sameIp)
       expect(res.status).toBe(401)
     }
-    const res = await post('/auth/login', body, sameIp)
+    const res = await post('/login', body, sameIp)
 
     expect(res.status).toBe(429)
+    expect(await res.json()).toEqual({
+      success: false,
+      error: 'Too many requests, please try again later'
+    })
   })
 
   it('Does not allow cross-origin access on the auth routes', async () => {
